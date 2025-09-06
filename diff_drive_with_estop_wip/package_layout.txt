@@ -1,0 +1,17 @@
+ros2_ws/src/my_diffdrive_controller/
+├── CMakeLists.txt
+├── package.xml
+├── include/my_diffdrive_controller/diff_drive_with_estop.hpp
+├── src/diff_drive_with_estop.cpp
+├── plugin.xml
+
+
+colcon build --packages-select my_diffdrive_controller
+source install/setup.bash
+
+
+ros2 topic pub /my_diffbot_controller/emergency_stop std_msgs/Bool "data: true"
+
+
+ros2 topic pub /my_diffbot_controller/emergency_stop std_msgs/Bool "data: false"
+

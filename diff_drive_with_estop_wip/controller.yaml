@@ -1,0 +1,8 @@
+my_diffbot_controller:
+  type: "my_diffdrive_controller/DiffDriveWithEStop"
+  ros__parameters:
+    left_wheel_names: ["left_wheel_joint"]
+    right_wheel_names: ["right_wheel_joint"]
+    wheel_separation: 0.5
+    wheel_radius: 0.1
+
