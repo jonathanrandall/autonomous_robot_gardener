@@ -1,7 +1,7 @@
 ### Parts list:
-1. Cytron MD10C R3 motor controllers X 4. Or you can 2 X dual cytron dual motor drivers. I would recommend cytron if you want to use my code an wiring.
-2. PCB or bread board. I printed up a PCB. The gerber files and fritzing files should be attached to this repo. I got this done at ![PCBWay](https://www.pcbway.com/).
-3. ESP32: I'm using the 38 pin waveshare esp32. This has a thinner form factor than the ones you get off Amazon. My PCB design should also fit the fatter 38 pin esp32. I got it here ![https://www.waveshare.com/nodemcu-32s.htm](https://www.waveshare.com/nodemcu-32s.htm)
+* Cytron MD10C R3 motor controllers X 4. Or you can 2 X dual cytron dual motor drivers. I would recommend cytron if you want to use my code an wiring.
+* PCB or bread board. I printed up a PCB. The gerber files and fritzing files should be attached to this repo. I got this done at ![PCBWay](https://www.pcbway.com/).
+* ESP32: I'm using the 38 pin waveshare esp32. This has a thinner form factor than the ones you get off Amazon. My PCB design should also fit the fatter 38 pin esp32. I got it here ![https://www.waveshare.com/nodemcu-32s.htm](https://www.waveshare.com/nodemcu-32s.htm)
 4. Nylon stand offs. I would get two packs of these.
 5. 6S lipo battery or 2 X 3S lipo batteries. I used two 3S lip batteries in series. Also will need one 3S for the top.
 6. Battery mount. I 3D printed mine. But you can make one out of lego, since the grid plates on the gobilda system line up with the lego grids, it is easy to drill holes to attach.
@@ -28,5 +28,6 @@
 27. Copper standoffs for XARM.
 28. Nylong standoffs for 8V buck converter.
 14. Male to male jumpber cables for connecting 8V buck converter to robot arm.
+
 
 
