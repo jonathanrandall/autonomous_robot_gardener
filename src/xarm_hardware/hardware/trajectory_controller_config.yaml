@@ -1,0 +1,66 @@
+# Trajectory Joint Controller Configuration for xArm
+# This file configures the trajectory joint controller to work with the xArm hardware interface
+
+trajectory_controller:
+  type: trajectory_controllers::JointTrajectoryController
+  
+  # Joint names (must match your URDF)
+  joints:
+    - joint1
+    - joint2
+    - joint3
+    - joint4
+    - joint5
+    - joint6
+  
+  # Command interfaces (what the controller sends to hardware)
+  command_interfaces:
+    - position
+    - velocity
+  
+  # State interfaces (what the controller reads from hardware)
+  state_interfaces:
+    - position
+    - velocity
+  
+  # Trajectory constraints
+  constraints:
+    # Position tolerance (radians)
+    position_tolerance: 0.01
+    
+    # Velocity tolerance (rad/s)
+    velocity_tolerance: 0.01
+    
+    # Goal time tolerance (seconds)
+    goal_time_tolerance: 0.5
+  
+  # Trajectory execution
+  execution:
+    # Allow partial goals (continue if some joints fail)
+    allow_partial_joints_goal: false
+    
+    # Allow integrating velocity commands
+    allow_integration_in_place: false
+    
+    # Stop trajectory execution on goal
+    stop_trajectory_duration: 0.0
+  
+  # Gains for trajectory following (if using velocity control)
+  gains:
+    joint1: {p: 100.0, i: 1.0, d: 10.0}
+    joint2: {p: 100.0, i: 1.0, d: 10.0}
+    joint3: {p: 100.0, i: 1.0, d: 10.0}
+    joint4: {p: 100.0, i: 1.0, d: 10.0}
+    joint5: {p: 100.0, i: 1.0, d: 10.0}
+    joint6: {p: 100.0, i: 1.0, d: 10.0}
+  
+  # Hardware interface configuration
+  hardware_interface:
+    # Use the xArm hardware interface
+    plugin: xarm_hardware/XArmHardware
+    
+    # Serial communication parameters
+    parameters:
+      serial_port: "/dev/ttyUSB0"
+      baud_rate: 115200
+      timeout: 0.1

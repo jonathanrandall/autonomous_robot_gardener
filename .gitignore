@@ -1,6 +1,12 @@
 # Prerequisites
 *.d
 
+# Ignore build, log, and install directories and all their content
+build/
+log/
+install/
+
+
 # Compiled Object files
 *.slo
 *.lo

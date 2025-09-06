@@ -1,0 +1,112 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- Hardware for real robot -->
+    <xacro:unless value="$(arg sim_mode)">
+        <ros2_control name="RealRobot" type="system">
+            <hardware>
+                <plugin>diffdrive_arduino/DiffDriveArduinoHardware</plugin>
+                <!-- You may need to update your hardware plugin to accept multiple wheel names -->
+                <param name="left_wheel_names">left_front_wheel_joint, left_rear_wheel_joint</param>
+                <param name="right_wheel_names">right_front_wheel_joint, right_rear_wheel_joint</param>
+                <param name="loop_rate">30</param>
+                <param name="device">/dev/ttyUSB0</param>
+                <param name="baud_rate">57600</param>
+                <param name="timeout_ms">1000</param>
+                <param name="enc_counts_per_rev">3436</param>
+            </hardware>
+
+            <!-- Left wheels -->
+            <joint name="left_front_wheel_joint">
+                <command_interface name="velocity">
+                    <param name="min">-10</param>
+                    <param name="max">10</param>
+                </command_interface>
+                <state_interface name="position"/>
+                <state_interface name="velocity"/>
+            </joint>
+            <joint name="left_rear_wheel_joint">
+                <command_interface name="velocity">
+                    <param name="min">-10</param>
+                    <param name="max">10</param>
+                </command_interface>
+                <state_interface name="position"/>
+                <state_interface name="velocity"/>
+            </joint>
+
+            <!-- Right wheels -->
+            <joint name="right_front_wheel_joint">
+                <command_interface name="velocity">
+                    <param name="min">-10</param>
+                    <param name="max">10</param>
+                </command_interface>
+                <state_interface name="position"/>
+                <state_interface name="velocity"/>
+            </joint>
+            <joint name="right_rear_wheel_joint">
+                <command_interface name="velocity">
+                    <param name="min">-10</param>
+                    <param name="max">10</param>
+                </command_interface>
+                <state_interface name="position"/>
+                <state_interface name="velocity"/>
+            </joint>
+        </ros2_control>
+    </xacro:unless>
+
+    <!-- Simulation in Gazebo -->
+    <xacro:if value="$(arg sim_mode)">
+        <ros2_control name="GazeboSystem" type="system">
+            <hardware>
+                <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+            </hardware>
+
+            <!-- Left wheels -->
+            <joint name="left_front_wheel_joint">
+                <command_interface name="velocity">
+                    <param name="min">-10</param>
+                    <param name="max">10</param>
+                </command_interface>
+                <state_interface name="velocity"/>
+                <state_interface name="position"/>
+            </joint>
+            <joint name="left_rear_wheel_joint">
+                <command_interface name="velocity">
+                    <param name="min">-10</param>
+                    <param name="max">10</param>
+                </command_interface>
+                <state_interface name="velocity"/>
+                <state_interface name="position"/>
+            </joint>
+
+            <!-- Right wheels -->
+            <joint name="right_front_wheel_joint">
+                <command_interface name="velocity">
+                    <param name="min">-10</param>
+                    <param name="max">10</param>
+                </command_interface>
+                <state_interface name="velocity"/>
+                <state_interface name="position"/>
+            </joint>
+            <joint name="right_rear_wheel_joint">
+                <command_interface name="velocity">
+                    <param name="min">-10</param>
+                    <param name="max">10</param>
+                </command_interface>
+                <state_interface name="velocity"/>
+                <state_interface name="position"/>
+            </joint>
+        </ros2_control>
+    </xacro:if>
+
+     <!-- <plugin name="gz_ros2_control::GazeboSimROS2ControlPlugin" filename="libgz_ros2_control-system.so"> -->
+    <!-- Gazebo ROS2 control plugin -->
+    <!-- <gazebo>
+        <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+       
+            <parameters>$(find autonomous_robot)/config/my_controllers.yaml</parameters>
+            <parameters>$(find autonomous_robot)/config/gaz_ros2_ctl_use_sim.yaml</parameters>
+        </plugin>
+    </gazebo> -->
+
+</robot>

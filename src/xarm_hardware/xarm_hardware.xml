@@ -1,0 +1,7 @@
+<library path="xarm_hardware">
+  <class name="xarm_hardware/XArmHardware" type="xarm_hardware::XArmHardware" base_class_type="hardware_interface::SystemInterface">
+    <description>
+      Hardware interface for xArm robot using libserial communication with ESP32
+    </description>
+  </class>
+</library>

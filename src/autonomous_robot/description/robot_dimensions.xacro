@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- Chassis -->
+  <xacro:property name="chassis_length" value="0.432"/>
+  <xacro:property name="chassis_width" value="0.432"/>
+  <xacro:property name="chassis_height" value="0.048"/>
+  <xacro:property name="chassis_wheel_offset_z" value="0.024"/>
+  <xacro:property name="chassis_wheel_offset_x" value="0.024"/>
+  <xacro:property name="chassis_mass" value="6.0"/>
+
+  <!-- Shelf 1 -->
+  <xacro:property name="shelf1_height" value="0.384"/>
+  <xacro:property name="shelf1_depth" value="0.144"/>
+  <xacro:property name="shelf1_width" value="${chassis_width}"/>
+  <xacro:property name="shelf1_z" value="${chassis_height + 0.05}"/>
+  <xacro:property name="shelf1_y" value="${-chassis_length/2 + shelf1_depth/2}"/>
+
+  <!-- Shelf 2 -->
+  <xacro:property name="shelf2_height" value="0.05"/>
+  <xacro:property name="shelf2_depth" value="0.18"/>
+  <xacro:property name="shelf2_width" value="${chassis_width}"/>
+  <xacro:property name="shelf2_z" value="${chassis_height + 0.15}"/>
+  <xacro:property name="shelf2_y" value="${-chassis_length/2 + shelf2_depth/2}"/>
+
+  <!-- Shelf Mass -->
+  <xacro:property name="shelf_mass" value="1.0"/>
+
+  <!-- Wheel -->
+  <xacro:property name="wheel_radius" value="0.072"/>
+  <xacro:property name="wheel_width" value="0.052"/>
+  <xacro:property name="wheel_mass" value="0.5"/>
+
+  <!-- Wheel Offsets -->
+  <xacro:property name="wheel_x_offset" value="${chassis_length/2 - chassis_wheel_offset_x}"/>
+  <xacro:property name="wheel_y_offset" value="${chassis_width/2 + wheel_width/2}"/>
+  <xacro:property name="wheel_z_offset" value="${chassis_wheel_offset_z}"/>
+
+</robot>

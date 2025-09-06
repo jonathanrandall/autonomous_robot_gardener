@@ -1,0 +1,24 @@
+joy_node:
+  ros__parameters:
+    device_id: 0
+    deadzone: 0.05
+    autorepeat_rate: 20.0
+
+min_joy_listen:
+  ros__parameters:
+    # Axis configuration for X and Y position control
+    axis_x: 1  # Axis 0 for X position (left/right)
+    axis_y: 0  # Axis 1 for Y position (forward/backward)
+    axis_z: 7  # Axis 7 for Z position (up/down)
+    
+    # Button configuration for Z position control (deprecated - now using axis 7)
+    button_z_up: 6    # Button 6 for Z up (kept for backward compatibility)
+    button_z_down: 8  # Button 8 for Z down (kept for backward compatibility)
+    
+    # Movement parameters
+    position_increment: 0.01  # How much to change position per input
+    update_rate_ms: 200       # Update rate in milliseconds
+    
+    # Safety limits
+    max_position_norm: 0.36   # Maximum allowed position norm
+    position_adjustment_factor: 0.8  # Factor to reduce position when exceeding limits

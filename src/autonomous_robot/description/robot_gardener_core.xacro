@@ -1,0 +1,232 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="four_wheel_drive_robot">
+
+  <xacro:include filename="robot_dimensions.xacro"/>
+  <xacro:include filename="inertial_macros.xacro"/>
+  <!-- Colors -->
+  <xacro:property name="color_chassis" value="0.6 0.6 0.6 1.0"/> <!-- metallic gray -->
+  <xacro:property name="color_wheel" value="0.05 0.05 0.05 1.0"/> <!-- black -->
+
+  <material name="white">
+      <color rgba="1 1 1 1" />
+  </material>
+
+  <material name="gray">
+      <color rgba="0.75 0.75 0.75 1" />
+  </material>
+
+  <material name="orange">
+      <color rgba="1 0.3 0.1 1"/>
+  </material>
+
+  <material name="blue">
+      <color rgba="0.2 0.2 1 1"/>
+  </material>
+
+  <material name="black">
+      <color rgba="0 0 0 1"/>
+  </material>
+
+  <material name="red">
+      <color rgba="1 0 0 1"/>
+  </material>
+
+  <xacro:macro name="set_gazebo_color" params="link_name color_name">
+    <gazebo reference="${link_name}">
+      <material>Gazebo/${color_name}</material>
+    </gazebo>
+  </xacro:macro>
+
+    <!-- ===================== -->
+  <!-- Macros                -->
+  <!-- ===================== -->
+
+
+
+  <!-- Shelf Macro -->
+  <xacro:macro name="shelf_link" params="name width depth height mass">
+    <link name="${name}">
+      <!-- <inertial> -->
+        <xacro:inertial_box mass="${mass}" x="${depth}" y="${width}" z="${height}">
+          <origin xyz="${depth/2} 0 ${height/2}" rpy="0 0 0"/>
+        </xacro:inertial_box>
+      <!-- </inertial> -->
+      <visual>
+        <origin xyz="${depth/2} 0 ${height/2}" rpy="0 0 0"/>
+        <geometry>
+          <box size="${depth} ${width} ${height}"/>
+        </geometry>
+        <material name="red"/>
+        <!-- <material>
+          <ambient>0.6 0.6 0.6 1.0</ambient>
+          <diffuse>0.6 0.6 0.6 1.0</diffuse>
+        </material> -->
+      </visual>
+      <collision>
+        <origin xyz="${depth/2} 0 ${height/2}" rpy="0 0 0"/>
+        <geometry>
+          <box size="${depth} ${width} ${height}"/>
+        </geometry>
+      </collision>
+    </link>
+  </xacro:macro>
+
+  <!-- Wheel Macro -->
+  <xacro:macro name="wheel_link" params="name">
+    <link name="${name}">
+      <!-- <inertial> -->
+        <xacro:inertial_cylinder mass="${wheel_mass}" length="${wheel_width}" radius="${wheel_radius}">
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+        </xacro:inertial_cylinder>
+      <!-- </inertial> -->
+      <visual>
+        <!-- <origin xyz="0 0 0" rpy="0 1.5708 0"/> -->
+        <geometry>
+          <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+        </geometry>
+        <material name="blue"/>
+      </visual>
+      <collision>
+        <!-- <origin xyz="0 0 0" rpy="0 1.5708 0"/> -->
+        <geometry>
+          <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+        </geometry>
+      </collision>
+    </link>
+  </xacro:macro>
+
+  <!-- BASE LINK -->
+
+  <link name="base_link">
+
+  </link>
+
+    <!-- BASE_FOOTPRINT LINK -->
+
+  <joint name="base_footprint_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="base_footprint"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <link name="base_footprint">
+  </link>
+
+  <!-- ===================== -->
+  <!-- Robot Structure       -->
+  <!-- ===================== -->
+
+  <!-- Chassis -->
+
+  <joint name="chassis_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="chassis"/>
+    <origin xyz="0 0 ${wheel_radius-chassis_wheel_offset_z}"/>
+  </joint>
+
+  <link name="chassis">
+    <visual>
+      <origin xyz="0 0 ${chassis_height/2}" rpy="0 0 0"/>
+      <geometry>
+          <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 ${chassis_height/2}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
+      </geometry>
+    </collision>
+    <xacro:inertial_box mass="${chassis_mass}" x="${chassis_length}" y="${chassis_width}" z="${chassis_height}">
+      <origin xyz="0 0 ${chassis_height/2}" rpy="0 0 0"/>
+    </xacro:inertial_box>
+  </link>
+
+  <gazebo reference="chassis">
+    <material>
+      <ambient>0.75 0.75 0.75 1</ambient>   <!-- Light gray / silver -->
+      <diffuse>0.75 0.75 0.75 1</diffuse>
+      <specular>0.9 0.9 0.9 1</specular>
+      <emissive>0 0 0 1</emissive>
+    </material>
+  </gazebo>
+
+   <!-- Wheels -->
+  <xacro:wheel_link name="left_front_wheel"/>
+  <xacro:wheel_link name="left_rear_wheel"/>
+  <xacro:wheel_link name="right_front_wheel"/>
+  <xacro:wheel_link name="right_rear_wheel"/>
+
+  <xacro:set_gazebo_color link_name="left_front_wheel" color_name="Blue"/>
+  <xacro:set_gazebo_color link_name="left_rear_wheel" color_name="Red"/>
+  <xacro:set_gazebo_color link_name="right_front_wheel" color_name="Blue"/>
+  <xacro:set_gazebo_color link_name="right_rear_wheel" color_name="Red"/>
+  
+
+
+  <!-- Shelves -->
+  <xacro:shelf_link name="shelf1"
+                    width="${shelf1_width}"
+                    depth="${shelf1_depth}"
+                    height="${shelf1_height}"
+                    mass="${shelf_mass}"/>
+  <!-- <xacro:shelf_link name="shelf2"
+                    width="${shelf2_width}"
+                    depth="${shelf2_depth}"
+                    height="${shelf2_height}"
+                    mass="${shelf_mass}"
+                    z="${shelf2_z}"
+                    y="${shelf2_y}"/> -->
+
+ 
+
+
+  <!-- ===================== -->
+  <!-- Joints                -->
+  <!-- ===================== -->
+
+  <!-- Shelves fixed to chassis -->
+  <joint name="shelf1_joint" type="fixed">
+    <parent link="chassis"/>
+    <child link="shelf1"/>
+    <origin xyz="-${chassis_length/2} 0 ${chassis_height}"/>
+  </joint>
+  <xacro:set_gazebo_color link_name="shelf1" color_name="Red"/>
+  <!-- <joint name="shelf2_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="shelf2"/>
+    <origin xyz="0 ${shelf2_y} ${shelf2_z}"/>
+  </joint> -->
+
+  <!-- Wheels revolute joints -->
+  <joint name="left_front_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="left_front_wheel"/>
+    <origin xyz="${wheel_x_offset} ${wheel_y_offset} ${wheel_z_offset}" rpy="-${pi/2} 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+  <joint name="left_rear_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="left_rear_wheel"/>
+    <origin xyz="${-wheel_x_offset} ${wheel_y_offset} ${wheel_z_offset}" rpy="-${pi/2} 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+  <joint name="right_front_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="right_front_wheel"/>
+    <origin xyz="${wheel_x_offset} ${-wheel_y_offset} ${wheel_z_offset}" rpy="${pi/2} 0 0"/>
+    <axis xyz="0 0 -1"/>
+  </joint>
+  <joint name="right_rear_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="right_rear_wheel"/>
+    <origin xyz="${-wheel_x_offset} ${-wheel_y_offset} ${wheel_z_offset}" rpy="${pi/2} 0 0"/>
+    <axis xyz="0 0 -1"/>
+  </joint>
+
+
+
+  <!-- <xacro:ignition_diffdrive_plugin/> -->
+
+</robot>
