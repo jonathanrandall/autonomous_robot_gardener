@@ -7,7 +7,7 @@ coming soon...
 This project has separate BOMs for mechanical and electronic components:
 
 - [Chassis BOM](docs/chassis_bom.md)<br/>  
-  Structural parts, wheels, brackets, and hardware.
+  Structural parts, wheels and brackets.
   
 - [Electronics BOM](docs/electronics_bom.md)<br/>  
   Includes:
