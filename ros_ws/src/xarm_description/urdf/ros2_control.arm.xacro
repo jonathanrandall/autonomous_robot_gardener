@@ -127,7 +127,7 @@
   </xacro:unless>
 
   <xacro:if value="$(arg sim_mode)">
-    <ros2_control name="GazeboSystem" type="system">
+    <ros2_control name="arm_system" type="system">
         <hardware>
             <plugin>gz_ros2_control/GazeboSimSystem</plugin>
         </hardware>

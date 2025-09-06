@@ -19,8 +19,9 @@
         <origin xyz="${chassis_length1/4+0.02} ${chassis_width1/4+0.02} ${chassis_height1}" rpy="0.0 0.0 -${pi/2}"/>
     </joint>
     
-
+    <xacro:property name="sim_mode" value="true"/>
     <!-- <xacro:include filename="ros2_control.arm.xacro" /> -->
+    <!-- <xacro:include filename="ros2_control.arm copy.xacro" /> -->
     <xacro:include filename="$(find xarm_description)/urdf/ros2_control.arm.xacro"/>
     
 </robot>

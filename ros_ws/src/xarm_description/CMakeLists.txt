@@ -36,10 +36,10 @@ install(
   DESTINATION lib/${PROJECT_NAME}
 )
 
-install(
-  PROGRAMS scripts/test_joy.py
-  DESTINATION lib/${PROJECT_NAME}
-)
+# install(
+#   PROGRAMS scripts/test_joy.py
+#   DESTINATION lib/${PROJECT_NAME}
+# )
 
 ament_package()
 
