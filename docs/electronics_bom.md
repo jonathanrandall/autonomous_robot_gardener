@@ -21,6 +21,7 @@
 #### __Powering the robot__
 * 3s lipo battery for the electronics.
 * 6S lipo battery for the motors.
+* Battery for mini-pc
 * Missile Switch for the 6s lipo. I used the missile switch to control the power to the motors because it's easy to turn off in a hurry, and i liked the look of it. I attached it with lego.
 * Rocker Switch for the 3s lipo.
 * High current buck converter for 12V motor power. I'm using [this one](https://www.amazon.com.au/dp/B0BRWD2VRT), which outputs 20A max. 
@@ -30,6 +31,7 @@
 * Fork lugs for connecting the wires if using terminal strips.
 * Red and Black wires. Make sure you use red for positive and black for ground.
 * Copper and/or nylon standoffs. I used 3M.
+
 
 
 
