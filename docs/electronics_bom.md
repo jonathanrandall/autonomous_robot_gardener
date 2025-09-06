@@ -9,7 +9,7 @@
 * Raspberry pi 4
 * Servo pan-tilt mechanism to mount the cameras on
 
-#### __ESP32 and motor controllers__
+#### __Control & Electronics__
 * Cytron MD10C R3 motor controllers X 4. Or you can 2 X dual cytron dual motor drivers. I would recommend cytron if you want to use my code an wiring.
 * PCB or bread board. I printed up a PCB. The gerber files and fritzing files should be attached to this repo. I got this done at ![PCBWay](https://www.pcbway.com/).
 * ESP32: I'm using the 38 pin waveshare esp32. This has a thinner form factor than the ones you get off Amazon. My PCB design should also fit the fatter 38 pin esp32. I got it here ![https://www.waveshare.com/nodemcu-32s.htm](https://www.waveshare.com/nodemcu-32s.htm)
@@ -30,6 +30,7 @@
 * Fork lugs for connecting the wires if using terminal strips.
 * Red and Black wires. Make sure you use red for positive and black for ground.
 * Copper and/or nylon standoffs. I used 3M.
+
 
 
 
