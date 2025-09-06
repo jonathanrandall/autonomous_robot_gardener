@@ -4,9 +4,9 @@
 * [Hiwonder XARM esp32](https://www.hiwonder.com/products/xarm-esp32)
 * Mini PC. I'm using [this one from Amazon](https://www.amazon.com.au/dp/B0CGZX9M96), but shop around.
 * RPLidar module
-* Time of flight Camera
-* USB camera
-* Raspberry pi 4
+* Time of flight Camera (I'm using one from Arducam)
+* USB camera (I'm using one from Arducam)
+* Raspberry pi 4 (to connect to the time of flight camera)
 * Servo pan-tilt mechanism to mount the cameras on
 
 #### __Control & Electronics__
@@ -31,6 +31,7 @@
 * Fork lugs for connecting the wires if using terminal strips.
 * Red and Black wires. Make sure you use red for positive and black for ground.
 * Copper and/or nylon standoffs. I used 3M.
+
 
 
 
