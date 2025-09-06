@@ -5,7 +5,7 @@ coming soon...
 
 <ins>parts list for chassis</ins>
 * 2 X 432mm 1120 Series U-Channel (SKU: 1120-0017-0432)
-* 2 X 528mm 1120 Series U-Chaneel (SKU: 1120-0021-0528)
+* 2 X 336mm 1120 Series U-Chaneel (SKU: 1120-0013-0336)
 * 4 X 1201 Series Quadblock pattern mount (SKU: 1201-0043-0002)
 * 16 X 11mm M4 screws
 * 16 X 8mm M4 screws
