@@ -15,7 +15,7 @@
 * 1 X 1116 Series Grid Plate, 29 x 53 Hole, 232 x 424mm (SKU: 1116-0232-0424)
 * Nylon or copper standoffs (I'm using M3) for mounting the grid plate on.
 
-![attach motor](https://github.com/jonathanrandall/autonomous_robot_gardener/blob/main/photos/attach_motor.JPEG)<br/>
+![attach motor](https://github.com/jonathanrandall/autonomous_robot_gardener/blob/main/photos/attach_motor.JPEG) ![pillow blocks](https://github.com/jonathanrandall/autonomous_robot_gardener/blob/main/photos/pillow_blocks.JPEG)<br/>
 
 <ins>**parts for motor and wheels**</ins>
 * 5204 Series Yellow  Jacket Planetary Gear Motor, 80mm Lenght 8mm REX shart, 117 RPM (SKU: 5204-8002-0051). Note, this is the long shaft motor. If you use the shorter shaft, you will need a coupler and a shaft to attach to the wheel. This can be quite fiddly and adds to the cost. Also I'm using the 117 RPM motor, which is not fast but has good torque. My aim is to handle a payload of up to 50kg on a 30 degree incline. According to my calculations, this should handle that quite well, but might struggle witht he 223 RMP version.
@@ -24,4 +24,5 @@
 * Four wheels. I'm using the Wasteland Wheel, 144mm Diameter, 52mm Width (SKU: 3616-0014-0144)
 * 16 X 11mm M4 screws (can also use 10mm).
 * 4 X washers
+
 
