@@ -1,0 +1,69 @@
+
+{
+  "name": "humble desktop",
+  "dockerFile": "Dockerfile",
+  "runArgs": [
+    "--privileged",
+    "--network=host",
+    "--device=/dev/dri",
+    "--group-add=video",
+    "--group-add=dialout",
+    "--volume=/dev:/dev",
+    "--device=/dev/input/js*:/dev/input/js*",
+    "--device-cgroup-rule=c *:* rmw",
+    "--volume=/run/udev:/run/udev:ro",     
+    "--device=/dev/video0",
+    "--device=/dev/video1",
+    "--device=/dev/video2",
+    "--device=/dev/video3",
+    "--device=/dev/video4",
+    "--device=/dev/video5",
+    "--device=/dev/video6",
+    "--env", "DISPLAY=${env:DISPLAY}",
+    "--volume", "/tmp/.X11-unix:/tmp/.X11-unix",
+    "--ipc=host"
+  ],
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached"
+  ],
+  "workspaceFolder": "/workspace",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools-extension-pack",
+        "ms-python.python"
+      ]
+    }
+  }
+}
+
+// {
+//   "name": "humble desktop",
+//   "dockerFile": "Dockerfile",
+//   "runArgs": [
+//     // "--privileged",
+//     // "--network=host",
+//     // "--device=/dev/dri",
+//     // "--group-add=video",
+//     // "--env", "DISPLAY=${env:DISPLAY}",
+//     // "--volume", "/tmp/.X11-unix:/tmp/.X11-unix",
+//     // "--ipc=host"
+//   ], 
+//   "mounts": [
+//     "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached"
+//   ],
+//   "features": {
+//     "ghcr.io/devcontainers/features/gpu-tools:1": {
+//       "install": false
+//     }
+//   },
+//   "workspaceFolder": "/workspace",
+//   "customizations": {
+//     "vscode": {
+//       "extensions": [
+//         "ms-vscode.cpptools-extension-pack",
+//         "ms-python.python"
+//       ]
+//     }
+//   }
+// }
