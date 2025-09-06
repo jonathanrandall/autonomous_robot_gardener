@@ -6,6 +6,5 @@ coming soon...
 
 This project has separate BOMs for mechanical and electronic components:
 
-- [Chassis BOM](docs/chassis_bom.md)
-  
+- [Chassis BOM](docs/chassis_bom.md)  
 - [Electronics BOM](docs/electronics_bom.md)
