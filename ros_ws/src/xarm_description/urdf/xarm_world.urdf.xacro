@@ -7,7 +7,7 @@
     <xacro:arg name="serial_port_esp32" default="/dev/ttyUSB0"/>
 
     <!-- <xacro:include filename="$(find xarm_description)/urdf/xarm.urdf"/> -->
-    <xacro:include filename="$(find xarm_description)/urdf/xarm_v2.urdf"/>
+    <xacro:include filename="$(find xarm_description)/urdf/xarm_v3.urdf"/>
     <link name="world"/>
     <xacro:arg name="initial_z" default="0.0"/>
 
@@ -18,4 +18,5 @@
     </joint>
 
     <xacro:include filename="$(find xarm_description)/urdf/ros2_control.arm.xacro" />
+    <xacro:include filename="$(find xarm_description)/urdf/ros2_control_params.xacro" />
 </robot>

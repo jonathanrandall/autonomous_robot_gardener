@@ -11,7 +11,8 @@
     <!-- <xacro:include filename="$(find autonomous_robot)/description/robot_dimensions.xacro"/> -->
 
     <!-- <xacro:include filename="$(find xarm_description)/urdf/xarm.urdf"/> -->
-    <xacro:include filename="xarm_v2.urdf"/>
+    <xacro:include filename="$(find xarm_description)/urdf/xarm_v3.urdf"/>
+    <!-- <xacro:include filename="xarm_v2.urdf"/> -->
     <joint name="xarm_chassis" type="fixed">
         <parent link="chassis"/>
         <child link="xarm_base_link"/>
@@ -19,5 +20,7 @@
     </joint>
     
 
-    <xacro:include filename="ros2_control.arm.xacro" />
+    <!-- <xacro:include filename="ros2_control.arm.xacro" /> -->
+    <xacro:include filename="$(find xarm_description)/urdf/ros2_control.arm.xacro"/>
+    
 </robot>

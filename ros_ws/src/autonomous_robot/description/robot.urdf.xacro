@@ -15,7 +15,7 @@
     <xacro:include filename="lidar.xacro" />
     <xacro:include filename="camera.xacro" />
     <xacro:include filename="xarm_xacros/xarm.xacro" />
-    <xacro:include filename="xarm_xacros/ros2_control_params.xacro" />
+    <xacro:include filename="ros2_control_params.xacro" />
     
 
     <!-- <xacro:include filename="xarm.urdf"/> -->
