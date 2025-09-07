@@ -148,16 +148,16 @@ void handleMotorCommand(String cmd)
     if (uxQueueMessagesWaiting(speed_queue) == 0)
     {
       xQueueSend(speed_queue, &motor_s, portMAX_DELAY);
-      Serial.println("Motor speeds queued successfully");
+      Serial.println("Motor speeds queued successfully\r");
     }
     else
     {
-      Serial.println("Speed queue is full, command ignored");
+      Serial.println("Speed queue is full, command ignored\r");
     }
   }
   else
   {
-    Serial.println("Invalid motor command format. Use: m val1 val2 val3 val4");
+    Serial.println("Invalid motor command format. Use: m val1 val2 val3 val4 " + cmd + "_");
   }
 }
 
@@ -168,11 +168,11 @@ void handlePIDCommand(String cmd)
     Kp = pid[0];
     Ki = pid[1];
     Kd = pid[2];
-    Serial.println("Updated PID values: Kp=");
+    Serial.println("Updated PID values: Kp=" + String(Kp) + " Ki=" + String(Ki) + " Kd=" + String(Kd) + "\r");
   }
   else
   {
-    Serial.println("Invalid motor command format. Use: u val1 val2 val3 ");
+    Serial.println("Invalid motor command format. Use: u val1 val2 val3\r");
   }
 }
 
@@ -191,7 +191,7 @@ String handleSerialCommand(String cmd)
   }
   else
   {
-    return "Unknown command";
+    return "Unknown command_";
   }
 }
 
@@ -207,26 +207,29 @@ void serial_command_process(void *pvParameters)
       cmd = Serial.readStringUntil('\n');
       cmd.trim(); // Remove any whitespace
 
-      if (cmd.startsWith("m "))
+      if (cmd.startsWith("m"))
       {
         // Handle motor speed command
         handleMotorCommand(cmd);
-        Serial.println("Motor command received\n");
+        Serial.println("Motor command received_");
+        // Serial.print("\r\n");
       }
       else if (cmd.startsWith("u"))
       {
         handlePIDCommand(cmd);
-        Serial.println("PID command received\n");
+        Serial.println("PID command received\r");
       }
       else if (cmd.startsWith("s"))
       {
         robot_stop();
-        Serial.println("robot stop command received\n");
+        // Serial.println("robot stop command received\r");
       }
       else if (cmd.startsWith("e"))
       {
-        String response = String(motor_spds[0]) + " " + String(motor_spds[1]) + " " + String(motor_spds[2]) + " " + String(motor_spds[3]);
-        Serial.println(response);
+        Serial.println("e command recieved_\r");
+        String response = String(motor_spds[0]) + " " + String(motor_spds[1]) + " " + String(motor_spds[2]) + " " + String(motor_spds[3]) + "_";
+        // Serial.println(response);
+        // Serial.print("_\r\n");
       }
 
       else

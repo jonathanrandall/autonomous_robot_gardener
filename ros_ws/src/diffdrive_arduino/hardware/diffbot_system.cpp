@@ -213,6 +213,13 @@ hardware_interface::CallbackReturn DiffDriveArduinoHardware::on_activate(
     // comms_.set_pid_values(cfg_.pid_p,cfg_.pid_d,cfg_.pid_i,cfg_.pid_o);
   }
   RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"), "Successfully activated!");
+  int tmp_vel[] = {50, 50, 50, 50};
+  int tmp_vel_stop[] = {0, 0, 0, 0};
+  comms_.set_motor_values(tmp_vel_stop);
+  rclcpp::sleep_for(std::chrono::milliseconds(2000));
+  comms_.set_motor_values(tmp_vel);
+  rclcpp::sleep_for(std::chrono::milliseconds(2000));
+  comms_.set_motor_values(tmp_vel_stop);
 
   return hardware_interface::CallbackReturn::SUCCESS;
 }
