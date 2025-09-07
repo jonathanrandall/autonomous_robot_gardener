@@ -1,0 +1,115 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="style_goal.css">
+    <title>ESP32 CAM Robot</title>
+
+
+</head>
+
+<body>
+    <br>
+    <div class="container">
+        <div class="card" align="center">
+            <img id="FRONT"
+                src="C:\Users\jonny\Documents\Arduino\Projects\Jessica Mothers day\pictures\final_pictures\alicia_baby2.png" />
+           <div class = "cards"> 
+               <table><tr><td align = "center">
+                <button class="button button2" id="go_to_manual"><a href="manual_drive">MANUAL</a></button>
+            </td><td></td><td align = "center">
+               <button class="button button2" id="stream1"
+               onclick="try{document.getElementById('REAR').id='FRONT';} catch(e){}">FRONT</button>
+                <!--onclick="setup('ws://192.168.1.184:81','FRONT');">FRONT</button>-->
+            </td><td></td><td align = "center">
+            <button class="button button2" id="stream2"
+            onclick="try{document.getElementById('FRONT').id='REAR';} catch(e){}">REAR</button>
+                <!--onclick="setup('ws://192.168.1.185:81','REAR');">REAR</button>-->
+            </tr></table>
+        </div>
+
+    </div></div>
+    <br>
+
+    <div class="cards" align="center">
+        <div class="card" > <!--onmouseup="update_motor_status('stop');" ontouchend="update_motor_status('stop');"-->
+            <table>
+
+                <tr>
+                    
+                    <td align="center"><button class="button button2" id="forwardleft"
+                            onmousedown="update_motor_status('forwardleft');"
+                            ontouchstart="update_motor_status('forwardleft');">FWDLFT</button>
+                    </td>
+                    
+                    <td align="center"><button class="button button2" id="forward"
+                            onmousedown="update_motor_status('forward');"
+                            ontouchstart="update_motor_status('forward');">FORWARD</button>
+                    </td>
+                    
+                    <td align="center"><button class="button button2" id="forwardright"
+                            onmousedown="update_motor_status('forwardright');"
+                            ontouchstart="update_motor_status('forwardright');">FWDRGT</button>
+                    </td>
+                    
+                </tr>
+                <tr>
+                    <td align="center"><button class="button button2" id="turnleft"
+                            onmousedown="update_motor_status('left');"
+                            ontouchstart="update_motor_status('left');">LEFT</button></td>
+
+                    <td align="center"><button class="button button3" id="stop"
+                            onmousedown="update_motor_status('stop');"
+                            ontouchstart="update_motor_status('stop');">STOP</button></td>
+
+                    <td align="center"><button class="button button2" id="turnright"
+                            onmousedown="update_motor_status('right');"
+                            ontouchstart="update_motor_status('right');">RIGHT</button></td>
+                </tr>
+                <tr>
+                    <td align="center"><button class="button button2" id="backleft"
+                        onmousedown="update_motor_status('backleft');"
+                        ontouchstart="update_motor_status('backleft');">BKLFT</button>
+                    </td>
+                    <td align="center"><button class="button button2" id="backward"
+                            onmousedown="update_motor_status('back'); console.log('md')"
+                            ontouchstart="update_motor_status('back');">REVERSE</button>
+                    </td>
+                    <td align="center"><button class="button button2" id="backright"
+                        onmousedown="update_motor_status('backright');"
+                        ontouchstart="update_motor_status('backright');">BKRGT</button>
+                </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td align="center"><button class="button button3a" id="stopbig"
+                            onmousedown="update_motor_status('stop'); console.log('md')"
+                            ontouchstart="update_motor_status('stop');">STOP</button>
+                    </td>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <br>
+
+    <div class="cards" align="center">
+        <div class="card">
+
+
+            <p class="switch">
+                <input type="range" onchange="update_motor_speed(this)" id="slider2" min="0" max="200" step="1"
+                    value="100" class="slider">
+            </p>
+
+            <p class="state">Speed: <span id="textSliderValue">0</span>, Robot State: <span
+                    id="textRobotState">updating...</span></p>
+        </div>
+    </div>
+
+    <script src="script_goal.js"></script>
+</body>
+
+</html>

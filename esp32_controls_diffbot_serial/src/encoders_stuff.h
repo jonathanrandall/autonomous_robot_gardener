@@ -17,10 +17,10 @@
 #define encoder3PinA 33     // encoder bottom right
 #define encoder3PinB 25
 
-volatile long encoder0Pos = 0;    // encoder 1 top left
-volatile long encoder1Pos = 0;    // encoder 2 bottom left
-volatile long encoder2Pos = 0;    // encoder 3 top right
-volatile long encoder3Pos = 0;    // encoder 4 bottom right
+volatile long encoder0Pos = 0;    // encoder 1 top left //front left
+volatile long encoder1Pos = 0;    // encoder 2 bottom left //back left
+volatile long encoder2Pos = 0;    // encoder 3 top right //front right
+volatile long encoder3Pos = 0;    // encoder 4 bottom right //front 
 
 const float ppr = 1425.1; //pulses per revolution
 const float wheel_diameter = 13.7;//14.4;//cm
@@ -288,10 +288,15 @@ void IRAM_ATTR doEncoderH(){
 
 long get_encoder_pos(int mtr){
 
+  // if(mtr==0) return encoder0Pos;
+  // if(mtr==1) return encoder1Pos;
+  // if(mtr==2) return -encoder2Pos;
+  // if(mtr==3) return -encoder3Pos;
+
   if(mtr==0) return encoder0Pos;
   if(mtr==1) return encoder1Pos;
-  if(mtr==2) return -encoder2Pos;
-  if(mtr==3) return -encoder3Pos;
+  if(mtr==2) return encoder2Pos;
+  if(mtr==3) return encoder3Pos;
 
   return 0;
   
