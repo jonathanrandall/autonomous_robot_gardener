@@ -17,7 +17,7 @@ void esp32_task_setup();
 
 void setup() {
   WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   init_encoders();
   robot_setup();

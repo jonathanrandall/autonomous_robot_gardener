@@ -6,6 +6,7 @@
 // #include <cstdlib>
 #include <libserial/SerialPort.h>
 #include <iostream>
+#include <thread>
 
 LibSerial::BaudRate convert_baud_rate(int baud_rate)
 {
@@ -63,24 +64,32 @@ public:
 
   std::string send_msg(const std::string &msg_to_send, bool print_output = false)
   {
-    std::cerr << "In send_msg, connected: " << serial_conn_.IsOpen() << std::endl;
+    // std::cerr << "In send_msg, connected: " << serial_conn_.IsOpen() << std::endl;
     serial_conn_.FlushIOBuffers(); // Just in case
-    // do logger here
-    
-    std::cerr << "sending: " << msg_to_send << std::endl;
+
     serial_conn_.Write(msg_to_send);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
     // log the sent message
-    std::cerr << "Sent: " << msg_to_send << std::endl;
+    // std::cerr << "Sent: " << msg_to_send << std::endl;
 
     std::string response = "";
+    // std::string chunk;
     try
     {
       // Responses end with \r\n so we will read up to (and including) the \n.
-      serial_conn_.ReadLine(response, '_', timeout_ms_);
-      // serial_conn_.Read(response, 1); // Read up to the \r
-      // log response
-      std::cerr << "Response: " << response << std::endl;
-      // serial_conn_.ReadLine(response, '\n', timeout_ms_);
+      serial_conn_.ReadLine(response, '\n', timeout_ms_);
+      
+      // auto start_time = std::chrono::steady_clock::now();
+      // while (std::chrono::steady_clock::now() - start_time < std::chrono::milliseconds(100)){
+      //   if (serial_conn_.IsDataAvailable()){
+      //     serial_conn_.Read(chunk, 1); // Read up to the \r
+      //     response += chunk;
+      //     // break;
+      //   }
+      // }
+
+      // std::cerr << "Response: " << response << std::endl;
+
     }
     catch (const LibSerial::ReadTimeout &)
     {
@@ -91,7 +100,6 @@ public:
     {
       std::cout << "Sent: " << msg_to_send << " Recv: " << response << std::endl;
     }
-    response = "0 0 0 0"; // placeholder
 
     return response;
   }
@@ -120,6 +128,8 @@ public:
       vel_cms[2] = (double)values[2];
       vel_cms[3] = (double)values[3];
     }
+
+    // std::cerr << "Response: " << response << std::endl;
   }
 
   void read_encoder_values_old(int &val_1, int &val_2)
@@ -138,7 +148,7 @@ public:
   void set_motor_values(int *vel_cms)
   {
     std::stringstream ss;
-    ss << "m " << vel_cms[0] << " " << vel_cms[1] << " " << vel_cms[2] << " " << vel_cms[3] << "\r";
+    ss << "m_" << vel_cms[0] << "_" << vel_cms[1] << "_" << vel_cms[2] << "_" << vel_cms[3] << "_\r";
     std::cout << "Setting motor values to: " << ss.str() << std::endl;
     send_msg(ss.str());
   }

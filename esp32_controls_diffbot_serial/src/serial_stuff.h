@@ -11,6 +11,10 @@ int motor_s[4];
 float pid[3] = {0.1, 0.01, 0.005}; // default PID values
 
 // Function to parse motor speed command "m val1 val2 val3 val4"
+bool parse_command_d(String cmd, int *ms){
+  sscanf(cmd.c_str(), "m_%d_%d_%d_%d", &ms[0], &ms[1], &ms[2], &ms[3]);
+  return true;
+}
 bool parse_command_ints(String cmd, int *ms, int max_values = 5)
 {
   String tokens[max_values];
@@ -71,8 +75,6 @@ bool parse_command_ints(String cmd, int *ms, int max_values = 5)
   return true;
 }
 
-// ...existing code...
-
 bool parse_command_floats(String cmd, float *pid_, int max_values = 4)
 {
   String tokens[max_values];
@@ -131,12 +133,11 @@ bool parse_command_floats(String cmd, float *pid_, int max_values = 4)
 
   return true;
 }
-// ...existing code...
 
 // Function to handle motor speed commands and send to queue
 void handleMotorCommand(String cmd)
 {
-  if (parse_command_ints(cmd, motor_s))
+  if (parse_command_d(cmd, motor_s))
   {
     if (false)
       for (int i = 0; i < (4); i++)
@@ -147,8 +148,10 @@ void handleMotorCommand(String cmd)
     // check if speed_queue is full
     if (uxQueueMessagesWaiting(speed_queue) == 0)
     {
-      xQueueSend(speed_queue, &motor_s, portMAX_DELAY);
-      Serial.println("Motor speeds queued successfully\r");
+      // i want to wait 30ms max to send to queue 
+      
+      xQueueSend(speed_queue, &motor_s, 30 / portTICK_PERIOD_MS);
+      // Serial.println("Motor speeds queued successfully\r");
     }
     else
     {
@@ -157,7 +160,7 @@ void handleMotorCommand(String cmd)
   }
   else
   {
-    Serial.println("Invalid motor command format. Use: m val1 val2 val3 val4 " + cmd + "_");
+    // Serial.println("Invalid motor command format. Use: m val1 val2 val3 val4 " + cmd + "_");
   }
 }
 
@@ -168,11 +171,11 @@ void handlePIDCommand(String cmd)
     Kp = pid[0];
     Ki = pid[1];
     Kd = pid[2];
-    Serial.println("Updated PID values: Kp=" + String(Kp) + " Ki=" + String(Ki) + " Kd=" + String(Kd) + "\r");
+    // Serial.println("Updated PID values: Kp=" + String(Kp) + " Ki=" + String(Ki) + " Kd=" + String(Kd) + "\r");
   }
   else
   {
-    Serial.println("Invalid motor command format. Use: u val1 val2 val3\r");
+    // Serial.println("Invalid motor command format. Use: u val1 val2 val3\r");
   }
 }
 
@@ -199,25 +202,26 @@ void serial_command_process(void *pvParameters)
 {
   // QueueHandle_t speed_queue = (QueueHandle_t)pvParameters;
   String cmd;
+  int tmp = 0; // terminate for strings
 
   for (;;)
   {
     if (Serial.available())
     {
-      cmd = Serial.readStringUntil('\n');
+      cmd = Serial.readStringUntil('\r');
       cmd.trim(); // Remove any whitespace
 
-      if (cmd.startsWith("m"))
+      if (cmd.startsWith("m_"))
       {
         // Handle motor speed command
         handleMotorCommand(cmd);
-        Serial.println("Motor command received_");
+        // Serial.println("Motor command received_");
         // Serial.print("\r\n");
       }
       else if (cmd.startsWith("u"))
       {
         handlePIDCommand(cmd);
-        Serial.println("PID command received\r");
+        // Serial.println("PID command received\r");
       }
       else if (cmd.startsWith("s"))
       {
@@ -226,8 +230,8 @@ void serial_command_process(void *pvParameters)
       }
       else if (cmd.startsWith("e"))
       {
-        Serial.println("e command recieved_\r");
-        String response = String(motor_spds[0]) + " " + String(motor_spds[1]) + " " + String(motor_spds[2]) + " " + String(motor_spds[3]) + "_";
+        // Serial.println("e command recieved_\r");
+        // String response = String(motor_spds[0]) + " " + String(motor_spds[1]) + " " + String(motor_spds[2]) + " " + String(motor_spds[3]) + "_";
         // Serial.println(response);
         // Serial.print("_\r\n");
       }
@@ -236,8 +240,10 @@ void serial_command_process(void *pvParameters)
       {
         // Handle other commands
         String response = handleSerialCommand(cmd);
-        Serial.println(response);
+        // Serial.println(response);
       }
+      String response = String(motor_spds[0]) + " " + String(motor_spds[1]) + " " + String(motor_spds[2]) + " " + String(motor_spds[3]) + " " + String(tmp);
+      Serial.println(response);
     }
     vTaskDelay(10 / portTICK_PERIOD_MS); // Small delay to yield to other tasks
   }
