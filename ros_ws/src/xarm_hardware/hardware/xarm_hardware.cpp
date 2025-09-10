@@ -241,17 +241,7 @@ return_type XArmHardware::write(const rclcpp::Time & /*time*/, const rclcpp::Dur
     return return_type::OK;
   }
 
-  // RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), "Serial  write 2");
 
-  // Only position commands available - send them directly
-  // RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), 
-  //                 "osition interfaces: [%.2f,%.2f,%.2f,%.2f,%.2f,%.2f]",
-  //                 joint_position_states_[0], joint_position_states_[1], joint_position_states_[2],
-  //                 joint_position_states_[3], joint_position_states_[4], joint_position_states_[5]);
-  // RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), 
-  //                 "osition commands: [%.2f,%.2f,%.2f,%.2f,%.2f,%.2f]",
-  //                 joint_position_commands_[0], joint_position_commands_[1], joint_position_commands_[2],
-  //                 joint_position_commands_[3], joint_position_commands_[4], joint_position_commands_[5]);
   bool success = set_joint_positions(joint_position_commands_);
   // serial_comms_->write_position();
 
