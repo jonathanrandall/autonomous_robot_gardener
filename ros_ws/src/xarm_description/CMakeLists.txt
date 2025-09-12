@@ -21,20 +21,7 @@ install(
 )
 
 # Install the Python script as an executable
-install(
-  PROGRAMS scripts/position_ik_gui.py
-  DESTINATION lib/${PROJECT_NAME}
-)
 
-install(
-  PROGRAMS scripts/joystick_ik_gui.py
-  DESTINATION lib/${PROJECT_NAME}
-)
-
-install(
-  PROGRAMS scripts/min_joy_listen.py
-  DESTINATION lib/${PROJECT_NAME}
-)
 
 install(
   PROGRAMS scripts/min_joy_listen_v2.py
