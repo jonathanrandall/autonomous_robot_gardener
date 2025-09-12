@@ -46,13 +46,12 @@ class JoyListener(BaseRobotGUI):
         }
 
         # Current position and velocity
-        self.current_position = [0.0, 0.05, 0.1]  # Default from your test file
+        self.current_position = [0.06, 0.0, 0.06]  # Default from your test file
         self.current_velocity = [0.0, 0.0, 0.0]  # Current velocity in m/s
-        self.current_orientation = np.array([0.0, 0.0, -1.0])  # Z-axis orientation
+        
         self.previous_position = [0.0, 0.0, 0.36]
         self.current_joint_angles = [0.0] * len(self.joint_names)  # Initialize with zeros
-        # self.previous_position = [0.0, 0.0, 0.2]
-        # self.current_position = [0.0, 0.0, 0.2]
+
         
         # Timer for periodic updates (higher frequency for more responsive updates)
         self.timer = self.create_timer(0.1, self.timer_callback)  # 50Hz for smooth movement
@@ -99,8 +98,6 @@ class JoyListener(BaseRobotGUI):
 
         self.interpolation_factor = self.get_parameter('interpolation_factor').get_parameter_value().double_value
 
-        # self.max_position_norm = 0.2
-
         # Debug print of all parameters
         self.get_logger().info(
             f"axis_x={self.axis_x}, axis_y={self.axis_y}, axis_z={self.axis_z}, "
@@ -111,17 +108,6 @@ class JoyListener(BaseRobotGUI):
             f"interpolation_factor={self.interpolation_factor}"
         )
 
-        # # Get joystick configuration parameters
-        # self.axis_x = self.declare_parameter('axis_x', 0).value
-        # self.axis_y = self.declare_parameter('axis_y', 1).value
-        # self.axis_z = self.declare_parameter('axis_z', 7).value
-        # self.button_z_up = self.declare_parameter('button_z_up', 6).value
-        # self.button_z_down = self.declare_parameter('button_z_down', 8).value
-        # self.position_increment = self.declare_parameter('position_increment', 0.01).value
-        # self.update_rate_ms = self.declare_parameter('update_rate_ms', 200).value
-        # self.max_position_norm = self.declare_parameter('max_position_norm', 0.4).value
-        # self.position_adjustment_factor = self.declare_parameter('position_adjustment_factor', 0.8).value
-        
 
 
         self.subscription = self.create_subscription(
@@ -131,15 +117,14 @@ class JoyListener(BaseRobotGUI):
             10
         )
 
-        self.initial_ik_result = None   
-        self.calculate_ik_initial()
 
+        self.calculate_ik()
         self.send_position()
 
     def timer_callback(self):
         """Timer callback for continuous position updates based on velocity"""
         # Update position based on current velocity
-        dt = 0.05 # Time step (50Hz timer)
+        dt = 0.02 # Time step (50Hz timer)
         
         # Apply velocities to update position
         self.previous_position = self.current_position.copy()
@@ -149,6 +134,7 @@ class JoyListener(BaseRobotGUI):
         self.rotational_axis += self.current_velocity[1] * dt * 5
         self.rotational_axis = min(self.rotational_axis, self.joint_limits[self.joint_names[5]][1])
         self.rotational_axis = max(self.rotational_axis, self.joint_limits[self.joint_names[5]][0])
+        
         self.current_position[1] = 0.0
         self.current_position = (self.apply_safety_limits(self.current_position)).tolist()
         
@@ -186,10 +172,13 @@ class JoyListener(BaseRobotGUI):
         """Process joystick input and set velocities for continuous movement"""
         
         max_velocity = 0.1  # m/s for linear axes, rad/s for rotational
+        # self.get_logger().info(f"Axis {self.axis_x} value: {self.joy_state['axes'][self.axis_x]}")
 
         
         # Process X axis (left/right)
         if abs(self.joy_state['axes'][self.axis_x]) > 0.1:  # Deadzone
+            #log axis value
+            # self.get_logger().info(f"Axis {self.axis_x} value: {self.joy_state['axes'][self.axis_x]}")
             self.current_velocity[0] = 1.0*self.joy_state['axes'][self.axis_x] * max_velocity
         else:
             self.current_velocity[0] = 0.0
@@ -204,9 +193,7 @@ class JoyListener(BaseRobotGUI):
         if abs(self.joy_state['axes'][self.axis_z]) > 0.1:  # Deadzone
             self.current_velocity[2] = self.joy_state['axes'][self.axis_z] * max_velocity
         else:
-            self.current_velocity[2] = 0.0
-            
-
+            self.current_velocity[2] = 0.0    
 
     
     def normalise_orientation(self, vec):
@@ -216,7 +203,6 @@ class JoyListener(BaseRobotGUI):
             vec = vec / max_val
         return vec
     
-
 
     def send_position(self):
         """Send the calculated joint positions to the controller"""
@@ -228,11 +214,9 @@ class JoyListener(BaseRobotGUI):
         try:
             # Use the base class method to send trajectory
             trajectory = self.send_all_joints(self.current_joint_angles, time_from_start_sec=0)
-            # self.update_status("Position sent to controller", "blue")
             
         except Exception as e:
             self.get_logger().error(f"Error sending trajectory: {e}")
-            # self.update_status(f"Failed to send trajectory: {str(e)}", "red")
 
     def send_all_joints(self, joint_angles, time_from_start_sec=2):
         """Send all joint positions to the controller"""
@@ -264,7 +248,7 @@ class JoyListener(BaseRobotGUI):
         l1 = 0.101
         l2 = 0.095
         #log x and y
-        self.get_logger().info(f"Target position: x={x}, y={y}")
+        self.get_logger().info(f"Target position: x={x}, z={y}")
         
         x, y = self.scale_to_safe(x, y, l1, l2, margin=0.000001)
         self.current_position[0] = x
@@ -286,10 +270,10 @@ class JoyListener(BaseRobotGUI):
         cos_theta2 = (r2 - l1**2 - l2**2) / (2 * l1 * l2)
         cos_theta2 = max(-1.0, min(1.0, cos_theta2))  # Clamp to [-1, 1]
         #log cos_theta2
-        self.get_logger().info(f"cos(theta2): {cos_theta2}, r2: {r2}, l1: {l1}, l2: {l2}")
+        # self.get_logger().info(f"cos(theta2): {cos_theta2}, r2: {r2}, l1: {l1}, l2: {l2}")
         theta2_options = [math.acos(cos_theta2), -math.acos(cos_theta2)]  # elbow-up and elbow-down
         # log theta2 options
-        self.get_logger().info(f"Theta2 options (radians): {theta2_options}")
+        # self.get_logger().info(f"Theta2 options (radians): {theta2_options}")
 
         solutions = []
         for theta2 in theta2_options:

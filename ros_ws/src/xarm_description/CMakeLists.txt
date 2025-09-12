@@ -36,6 +36,11 @@ install(
   DESTINATION lib/${PROJECT_NAME}
 )
 
+install(
+  PROGRAMS scripts/min_joy_listen_v2.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 # install(
 #   PROGRAMS scripts/test_joy.py
 #   DESTINATION lib/${PROJECT_NAME}

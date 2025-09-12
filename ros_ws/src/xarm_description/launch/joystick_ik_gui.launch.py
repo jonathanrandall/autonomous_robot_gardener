@@ -58,8 +58,8 @@ def generate_launch_description():
 
         Node(
             package='xarm_description',
-            executable='min_joy_listen.py',
-            name='min_joy_listen',
+            executable='min_joy_listen_v2.py',
+            name='min_joy_listen_v2',
             output='screen',
             parameters=[joystick_config, {
                 # 'use_sim_time': LaunchConfiguration('use_sim_time'),
