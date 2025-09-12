@@ -24,8 +24,8 @@
       <xacro:if value="${eef == 'eef_2_finger'}">
         <joint name="xarm_1_joint">
             <command_interface name="position">
-            <param name="min">0.0035</param>
-            <param name="max">0.028</param>
+            <param name="min">-1.832</param>
+            <param name="max">0.75</param>
             </command_interface>
             <state_interface name="velocity"/>
             <state_interface name="position"/>
@@ -81,8 +81,8 @@
 
       <joint name="xarm_2_joint">
         <command_interface name="position">
-          <param name="min">-1.208</param>
-          <param name="max">1.933</param>
+          <param name="min">-2.35</param>
+          <param name="max">2.35</param>
         </command_interface>
         <state_interface name="position"/>
         <state_interface name="velocity"/>
@@ -90,8 +90,8 @@
 
       <joint name="xarm_3_joint">
         <command_interface name="position">
-          <param name="min">-1.613</param>
-          <param name="max">1.528</param>
+          <param name="min">-2.05</param>
+          <param name="max">2.35</param>
         </command_interface>
         <state_interface name="position"/>
         <state_interface name="velocity"/>
@@ -99,8 +99,8 @@
 
       <joint name="xarm_4_joint">
         <command_interface name="position">
-          <param name="min">-1.571</param>
-          <param name="max">1.571</param>
+          <param name="min">-2.2</param>
+          <param name="max">2.2</param>
         </command_interface>
         <state_interface name="position"/>
         <state_interface name="velocity"/>
@@ -108,8 +108,8 @@
 
       <joint name="xarm_5_joint">
         <command_interface name="position">
-          <param name="min">-1.613</param>
-          <param name="max">1.528</param>
+          <param name="min">-1.62</param>
+          <param name="max">1.62</param>
         </command_interface>
         <state_interface name="position"/>
         <state_interface name="velocity"/>
@@ -117,8 +117,8 @@
 
       <joint name="xarm_6_joint">
         <command_interface name="position">
-          <param name="min">-1.706</param>
-          <param name="max">1.436</param>
+          <param name="min">-2.35</param>
+          <param name="max">2.35</param>
         </command_interface>
         <state_interface name="position"/>
         <state_interface name="velocity"/>
