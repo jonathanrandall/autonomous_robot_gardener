@@ -1,28 +1,52 @@
+// {
+//     "name": "ROS Jazzy Devcontainer",
+//     "build": {
+//         "dockerfile": "Dockerfile",
+//         "context": ".."
+//     },
+//     "runArgs": [
+//         "--gpus", "all",
+//         "-e", "DISPLAY=${localEnv:DISPLAY}",
+//         "-e", "XDG_RUNTIME_DIR=/tmp/runtime-${localUser}",
+//         "-e", "XAUTHORITY=${localEnv:XAUTHORITY}",
+//         "--group-add", "video"
+//     ],
+//     "containerUser": "ubuntu",
+//     "remoteUser": "ubuntu",
+//     "postStartCommand": "mkdir -p /tmp/runtime-${localUser} && chmod 700 /tmp/runtime-${localUser}",
+//     "remoteEnv": {
+//         "XDG_RUNTIME_DIR": "/tmp/runtime-${localUser}"
+//     }
+// }
+
+
+
 {
-  "name": "humble desktop",
-  "dockerFile": "Dockerfile",
-  "runArgs": [
-    "--privileged",
-    "--network=host",
-    "--device=/dev/dri",
-    "--device=/dev/ttyUSB0",
-    "--volume=/dev:/dev",
-    "--device=/dev/input/js*:/dev/input/js*",
-    // "--device=/dev/input/event0:/dev/input/event0",
-    "--device-cgroup-rule=c *:* rmw",
-    "--volume=/run/udev:/run/udev:ro", 
-    "--group-add=video",
-    "--group-add=dialout",
-    "--env", "DISPLAY=${env:DISPLAY}",
-    "--volume", "/tmp/.X11-unix:/tmp/.X11-unix",    
-    "--gpus=all",
-    "--ipc=host"
-  ],
-  "mounts": [
-    "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached"
-  ],
-  "workspaceFolder": "/workspace",
-  "customizations": {
+    "name": "ROS Jazzy Devcontainer",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": ".."
+    },
+    "runArgs": [
+        "--privileged",                             // Required for some GPU drivers
+        "--gpus", "all",
+        "--device", "/dev/dri",                      // Intel/AMD GPU access
+        // "-v", "/tmp/.X11-unix:/tmp/.X11-unix:rw",   // X11 socket
+        "-e", "DISPLAY=${localEnv:DISPLAY}",        // Pass display
+        "-e", "XDG_RUNTIME_DIR=/tmp/runtime-${localUser}", // For Qt/Gazebo
+        "-e", "XAUTHORITY=${localEnv:XAUTHORITY}", // Optional
+        "--group-add", "video"                      // Access GPU/video
+    ],
+    "containerUser": "ubuntu",                     // non-root user
+    "remoteUser": "ubuntu",
+    "mounts": [
+        "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached"
+    ],
+    "postStartCommand": "mkdir -p /tmp/runtime-${localUser} && chmod 700 /tmp/runtime-${localUser}",
+    "remoteEnv": {
+        "XDG_RUNTIME_DIR": "/tmp/runtime-${localUser}"
+    },
+    "customizations": {
     "vscode": {
       "extensions": [
         "ms-vscode.cpptools-extension-pack",
