@@ -6,9 +6,9 @@ from sensor_msgs.msg import Joy
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from std_msgs.msg import Header
 from builtin_interfaces.msg import Duration
-import ikpy
-import ikpy.chain
-from ikpy.utils import geometry
+# import ikpy
+# import ikpy.chain
+# from ikpy.utils import geometry
 import numpy as np
 import math
 import os
