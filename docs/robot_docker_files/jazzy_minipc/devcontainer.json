@@ -1,0 +1,57 @@
+// {
+//     "name": "ROS Jazzy Devcontainer",
+//     "build": {
+//         "dockerfile": "Dockerfile",
+//         "context": ".."
+//     },
+//     "runArgs": [
+//         "--gpus", "all",
+//         "-e", "DISPLAY=${localEnv:DISPLAY}",
+//         "-e", "XDG_RUNTIME_DIR=/tmp/runtime-${localUser}",
+//         "-e", "XAUTHORITY=${localEnv:XAUTHORITY}",
+//         "--group-add", "video"
+//     ],
+//     "containerUser": "ubuntu",
+//     "remoteUser": "ubuntu",
+//     "postStartCommand": "mkdir -p /tmp/runtime-${localUser} && chmod 700 /tmp/runtime-${localUser}",
+//     "remoteEnv": {
+//         "XDG_RUNTIME_DIR": "/tmp/runtime-${localUser}"
+//     }
+// }
+
+
+
+{
+    "name": "ROS Jazzy Devcontainer",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": ".."
+    },
+    "runArgs": [
+        "--privileged",                             // Required for some GPU drivers
+        // "--gpus", "all",   //not for mini pc
+        "--device", "/dev/dri",                      // Intel/AMD GPU access
+        // "-v", "/tmp/.X11-unix:/tmp/.X11-unix:rw",   // X11 socket
+        "-e", "DISPLAY=${localEnv:DISPLAY}",        // Pass display
+        "-e", "XDG_RUNTIME_DIR=/tmp/runtime-${localUser}", // For Qt/Gazebo
+        "-e", "XAUTHORITY=${localEnv:XAUTHORITY}", // Optional
+        "--group-add", "video"                      // Access GPU/video
+    ],
+    "containerUser": "ubuntu",                     // non-root user
+    "remoteUser": "ubuntu",
+    "mounts": [
+        "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached"
+    ],
+    "postStartCommand": "mkdir -p /tmp/runtime-${localUser} && chmod 700 /tmp/runtime-${localUser}",
+    "remoteEnv": {
+        "XDG_RUNTIME_DIR": "/tmp/runtime-${localUser}"
+    },
+    "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools-extension-pack",
+        "ms-python.python"
+      ]
+    }
+  }
+}
