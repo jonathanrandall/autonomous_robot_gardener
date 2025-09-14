@@ -1,0 +1,33 @@
+{
+  "name": "humble desktop",
+  "dockerFile": "Dockerfile",
+  "runArgs": [
+    "--privileged",
+    "--network=host",
+    "--device=/dev/dri",
+    "--device=/dev/ttyUSB0",
+    "--volume=/dev:/dev",
+    "--device=/dev/input/js*:/dev/input/js*",
+    // "--device=/dev/input/event0:/dev/input/event0",
+    "--device-cgroup-rule=c *:* rmw",
+    "--volume=/run/udev:/run/udev:ro", 
+    "--group-add=video",
+    "--group-add=dialout",
+    "--env", "DISPLAY=${env:DISPLAY}",
+    "--volume", "/tmp/.X11-unix:/tmp/.X11-unix",    
+    "--gpus=all",
+    "--ipc=host"
+  ],
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached"
+  ],
+  "workspaceFolder": "/workspace",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools-extension-pack",
+        "ms-python.python"
+      ]
+    }
+  }
+}

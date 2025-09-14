@@ -1,0 +1,25 @@
+{
+  "name": "ros humble desktop",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "runArgs": [
+    "--privileged",
+    "--network=host",
+    "--volume=/dev:/dev",
+    "--device=/dev/input/js*:/dev/input/js*",
+    "--volume=/run/udev:/run/udev:ro",
+    "--group-add=video"
+    // "--group-add=998"   // use numeric GID from host (see note below)
+  ],
+  "containerUser": "vscode",
+  "remoteUser": "vscode",
+  "mounts": [
+    "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached"
+  ],
+  "containerEnv": {
+    "DISPLAY": ":1"
+  },
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+  "workspaceFolder": "/workspace"
+}
