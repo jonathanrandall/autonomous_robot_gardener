@@ -1,4 +1,4 @@
-# Managing the `input` Group on Ubuntu
+# Managing the `input` Group on Ubuntu (needed for gamepad)
 
 This guide explains how to check if the `input` group exists, create it if missing, and add a user (e.g., `ubuntu`) to it. Instructions are provided for both outside a Docker container and inside a Docker container.
 
