@@ -33,13 +33,10 @@
 
         <!-- mirror here -->
 
-       <!-- <joint name="xarm_1_joint_mirror">
-
-            <param name="mimic">xarm_1_joint</param>
-            <param name="multiplier">-1</param>
+       <joint name="xarm_1_joint_mirror">
             <state_interface name="position"/>
             <state_interface name="velocity"/>
-        </joint> -->
+        </joint>
       </xacro:if>
 
       <xacro:if value="${eef == 'eef_3_finger'}">
@@ -148,8 +145,8 @@
                 <joint>xarm_1_joint</joint>
                 <multiplier>-1</multiplier>
             </param> -->
-            <param name="mimic">xarm_1_joint</param>
-            <param name="multiplier">-1</param>
+            <!-- <param name="mimic">xarm_1_joint</param>
+            <param name="multiplier">-1</param> -->
             <state_interface name="position"/>
             <state_interface name="velocity"/>
         </joint>

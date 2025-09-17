@@ -194,7 +194,8 @@
 
          <!-- mirror here -->
 
-        <xacro:if value="$(arg sim_mode)">
+        <!-- <xacro:if value="$(arg sim_mode)"> -->
+        <xacro:if value="true">
         <link name="eef_2_finger_right_link">
             <visual>
                 <origin rpy="0 0 0" xyz="0.0 0.0 0.0" />
@@ -378,19 +379,20 @@
         </xacro:if>            
     </joint>
 
-<!-- 0.75 to -1.832 -->
+<!-- 0.75 to -1.832 0.003 0.028 -->
     <xacro:if value="${eef == 'eef_2_finger'}">
         <joint name="xarm_1_joint" type="prismatic">
             <origin rpy="0 0 0" xyz="0 0 0.050"/>
             <axis xyz="1 0 0" />
-            <limit effort="1000.0" lower="0.003" upper="0.028" velocity="0.5"/>
+            <limit effort="1000.0" lower="0.00" upper="0.028" velocity="0.5"/>
             <parent link="eef_base_link"/>
             <child link="eef_2_finger_left_link"/>
         </joint>
 
         <!-- mirror here -->
 
-        <xacro:if value="$(arg sim_mode)">
+        <!-- <xacro:if value="$(arg sim_mode)"> -->
+        <xacro:if value="true">
         <joint name="xarm_1_joint_mirror" type="prismatic">
             <origin rpy="0 0 0" xyz="0 0 0.050"/>
             <axis xyz="1 0 0" />
@@ -399,6 +401,8 @@
             <child link="eef_2_finger_right_link"/>
             <mimic multiplier="-1.0" joint="xarm_1_joint" />
         </joint>
+    
+
         </xacro:if>
        
     </xacro:if>

@@ -26,14 +26,20 @@
 namespace diffdrive_arduino
 {
 hardware_interface::CallbackReturn DiffDriveArduinoHardware::on_init(
-  const hardware_interface::HardwareInfo & info)
+  const hardware_interface::HardwareComponentInterfaceParams & params)
 {
-  if (
-    hardware_interface::SystemInterface::on_init(info) !=
-    hardware_interface::CallbackReturn::SUCCESS)
-  {
-    return hardware_interface::CallbackReturn::ERROR;
-  }
+  const auto & info = params.hardware_info;
+  
+
+    // --- DO NOT call SystemInterface::on_init(info) ---
+    // Instead, just do your own initialization
+
+    // Example: check joints and parameters
+    if (info.joints.empty()) {
+        RCLCPP_ERROR(rclcpp::get_logger("DiffDriveArduinoHardware"),
+                     "No joints specified in the hardware info!");
+        return hardware_interface::CallbackReturn::ERROR;
+    }
 
 
   // cfg_.left_wheel_name = info_.hardware_parameters["left_wheel_name"];

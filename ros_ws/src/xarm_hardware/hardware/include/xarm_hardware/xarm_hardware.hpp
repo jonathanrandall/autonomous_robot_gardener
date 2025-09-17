@@ -24,7 +24,7 @@ using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface
 class XArmHardware : public hardware_interface::SystemInterface
 {
 public:
-  CallbackReturn on_init(const hardware_interface::HardwareInfo & info) override;
+  CallbackReturn on_init(const hardware_interface::HardwareComponentInterfaceParams & params) override;
   CallbackReturn on_configure(const rclcpp_lifecycle::State & previous_state) override;
   CallbackReturn on_activate(const rclcpp_lifecycle::State & previous_state) override;
   CallbackReturn on_deactivate(const rclcpp_lifecycle::State & previous_state) override;
@@ -39,6 +39,7 @@ public:
 protected:
   // Joint control methods (delegated to SerialComms)
   bool set_joint_positions(const std::vector<double>& positions);
+  
   std::vector<double> get_joint_positions();
 
 private:
@@ -55,6 +56,7 @@ private:
   
   // Joint names
   std::vector<std::string> joint_names_;
+  int cmd_interfaces_ = 0;
 };
 
 }  // namespace xarm_hardware
