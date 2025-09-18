@@ -48,7 +48,7 @@ namespace xarm_hardware
     }
 
     // Initialize joint data for 6-DOF xArm trajectory controller
-    joint_position_commands_.assign(cmd_interfaces_, 0.0);   // Only position commands
+    // joint_position_commands_.assign(cmd_interfaces_, 0.0);   // Only position commands
     joint_position_states_.assign(joint_names_.size(), 0.0); // Position states
     joint_velocity_states_.assign(joint_names_.size(), 0.0); // Velocity states (calculated)
 
@@ -155,37 +155,74 @@ namespace xarm_hardware
     return state_interfaces;
   }
 
-  std::vector<hardware_interface::CommandInterface> XArmHardware::export_command_interfaces()
+  std::vector<hardware_interface::CommandInterface>
+XArmHardware::export_command_interfaces()
+{
+  std::vector<hardware_interface::CommandInterface> command_interfaces;
+  joint_position_commands_.clear();
+
+  for (size_t i = 0; i < info_.joints.size(); ++i)
   {
-    std::vector<hardware_interface::CommandInterface> command_interfaces;
+    const auto &joint = info_.joints[i];
 
-    for (const auto &joint : info_.joints)
+    if (joint.is_mimic == hardware_interface::MimicAttribute::TRUE)
+      continue;  // mimic joints don't get their own command interface
+
+    if (!joint.command_interfaces.empty())
     {
-      if (!joint.command_interfaces.empty())
-      {
-        command_interfaces.emplace_back(
-            hardware_interface::CommandInterface(joint.name, joint.command_interfaces[0].name, &joint_position_commands_[&joint - &info_.joints[0]]));
-      }
-      else
-      {
-        RCLCPP_ERROR(rclcpp::get_logger("XArmHardware"),
-                     "Joint %s has no command interfaces defined, mimi is set to %s",
-                     joint.name.c_str(), joint.is_mimic == hardware_interface::MimicAttribute::TRUE ? "true" : "false");
-      }
+      joint_position_commands_.push_back(0.0);
+      command_interfaces.emplace_back(
+        hardware_interface::CommandInterface(
+          joint.name,
+          joint.command_interfaces[0].name,
+          &joint_position_commands_.back()));
     }
-
-    // for (size_t i = 0; i < joint_names_.size(); i++)
-    // {
-    //   // Only position command interface for each joint (no velocity commands)
-    //   command_interfaces.emplace_back(
-    //     hardware_interface::CommandInterface(joint_names_[i], hardware_interface::HW_IF_POSITION, &joint_position_commands_[i]));
-    // }
-
-    RCLCPP_INFO(rclcpp::get_logger("XArmHardware"),
-                "Exported %zu command interfaces", command_interfaces.size());
-
-    return command_interfaces;
+    else
+    {
+      RCLCPP_WARN(rclcpp::get_logger("XArmHardware"),
+                  "Joint %s has no command interface", joint.name.c_str());
+    }
   }
+
+  RCLCPP_INFO(rclcpp::get_logger("XArmHardware"),
+              "Exported %zu command interfaces", command_interfaces.size());
+  return command_interfaces;
+}
+
+
+
+  // std::vector<hardware_interface::CommandInterface> XArmHardware::export_command_interfaces()
+  // {
+  //   std::vector<hardware_interface::CommandInterface> command_interfaces;
+  //   joint_position_commands_.clear();
+
+  //   for (const auto &joint : info_.joints)
+  //   {
+  //     if (!joint.command_interfaces.empty())
+  //     {
+  //       command_interfaces.emplace_back(
+  //           hardware_interface::CommandInterface(joint.name, joint.command_interfaces[0].name, &joint_position_commands_[&joint - &info_.joints[0]]));
+  //     }
+  //     else
+  //     {
+  //       RCLCPP_ERROR(rclcpp::get_logger("XArmHardware"),
+  //                    "Joint %s has no command interfaces defined, mimi is set to %s",
+  //                    joint.name.c_str(), joint.is_mimic == hardware_interface::MimicAttribute::TRUE ? "true" : "false");
+  //     }
+  //   }
+
+  //   // for (size_t i = 0; i < joint_names_.size(); i++)
+  //   // {
+  //   //   // Only position command interface for each joint (no velocity commands)
+  //   //   command_interfaces.emplace_back(
+  //   //     hardware_interface::CommandInterface(joint_names_[i], hardware_interface::HW_IF_POSITION, &joint_position_commands_[i]));
+  //   // }
+
+  //   RCLCPP_INFO(rclcpp::get_logger("XArmHardware"),
+  //               "Exported %zu command interfaces", command_interfaces.size());
+
+  //   return command_interfaces;
+  // }
 
   double hardware_to_ros(int ticks)
   {
