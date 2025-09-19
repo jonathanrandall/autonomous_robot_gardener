@@ -48,7 +48,7 @@ namespace xarm_hardware
     }
 
     // Initialize joint data for 6-DOF xArm trajectory controller
-    joint_position_commands_.assign(joint_names_.size(), 0.0);   // Only position commands
+    joint_position_commands_.assign(cmd_interfaces_, 0.0);   // Only position commands
     joint_position_states_.assign(joint_names_.size(), 0.0); // Position states
     joint_velocity_states_.assign(joint_names_.size(), 0.0); // Velocity states (calculated)
 
@@ -162,13 +162,15 @@ namespace xarm_hardware
   {
     std::vector<hardware_interface::CommandInterface> command_interfaces;
     // joint_position_commands_.clear();
+    int cnt = 0;
 
     for (const auto &joint : info_.joints)
     {
       if (!joint.command_interfaces.empty())
       {
         command_interfaces.emplace_back(
-            hardware_interface::CommandInterface(joint.name, joint.command_interfaces[0].name, &joint_position_commands_[&joint - &info_.joints[0]]));
+            hardware_interface::CommandInterface(joint.name, joint.command_interfaces[0].name, &joint_position_commands_[cnt]));
+        cnt++;
       }
       else
       {
@@ -258,7 +260,8 @@ namespace xarm_hardware
     int cnt = 0;
     for (auto joint : info_.joints)
     {
-      if (joint.is_mimic == hardware_interface::MimicAttribute::TRUE)
+      // if (joint.is_mimic == hardware_interface::MimicAttribute::TRUE)
+      if (joint.command_interfaces.empty())
       {
         //log message
         RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), "Mimic joint found: %s", joint.name.c_str());
