@@ -40,17 +40,18 @@ namespace xarm_hardware
     // Store joint names
     for (const auto &joint : info_.joints)
     {
-      joint_names_.push_back(joint.name);
+      
       if (!joint.command_interfaces.empty())
       {
+        joint_names_.push_back(joint.name);
         cmd_interfaces_++;
       }
     }
 
     // Initialize joint data for 6-DOF xArm trajectory controller
     joint_position_commands_.assign(cmd_interfaces_, 0.0);   // Only position commands
-    joint_position_states_.assign(joint_names_.size(), 0.0); // Position states
-    joint_velocity_states_.assign(joint_names_.size(), 0.0); // Velocity states (calculated)
+    joint_position_states_.assign(cmd_interfaces_, 0.0); // Position states
+    joint_velocity_states_.assign(cmd_interfaces_, 0.0); // Velocity states (calculated)
 
     // Initialize serial communication object
     serial_comms_ = std::make_unique<SerialComms>();
@@ -134,21 +135,31 @@ namespace xarm_hardware
     return CallbackReturn::SUCCESS;
   }
 
-
-
   std::vector<hardware_interface::StateInterface> XArmHardware::export_state_interfaces()
   {
     std::vector<hardware_interface::StateInterface> state_interfaces;
 
-    for (size_t i = 0; i < joint_names_.size(); i++)
-    {
-      // Position interface for each joint
-      state_interfaces.emplace_back(
-          hardware_interface::StateInterface(joint_names_[i], hardware_interface::HW_IF_POSITION, &joint_position_states_[i]));
+    int cnt = 0;
 
-      // Velocity interface for each joint
-      state_interfaces.emplace_back(
-          hardware_interface::StateInterface(joint_names_[i], hardware_interface::HW_IF_VELOCITY, &joint_velocity_states_[i]));
+    for (const auto &joint : info_.joints)
+    {
+      if (!joint.command_interfaces.empty())
+      {
+
+        state_interfaces.emplace_back(
+            hardware_interface::StateInterface(joint.name, hardware_interface::HW_IF_POSITION, &joint_position_states_[cnt]));
+
+        // Velocity interface for each joint
+        state_interfaces.emplace_back(
+            hardware_interface::StateInterface(joint.name, hardware_interface::HW_IF_VELOCITY, &joint_velocity_states_[cnt]));
+        cnt++;
+      }
+      else
+      {
+        RCLCPP_INFO(rclcpp::get_logger("XArmHardware"),
+                    "Joint %s has no command interfaces defined, mimi is set to %s",
+                    joint.name.c_str(), joint.is_mimic == hardware_interface::MimicAttribute::TRUE ? "true" : "false");
+      }
     }
 
     RCLCPP_INFO(rclcpp::get_logger("XArmHardware"),
@@ -157,7 +168,6 @@ namespace xarm_hardware
     return state_interfaces;
   }
 
- 
   std::vector<hardware_interface::CommandInterface> XArmHardware::export_command_interfaces()
   {
     std::vector<hardware_interface::CommandInterface> command_interfaces;
@@ -175,15 +185,15 @@ namespace xarm_hardware
       else
       {
         RCLCPP_INFO(rclcpp::get_logger("XArmHardware"),
-                     "Joint %s has no command interfaces defined, mimi is set to %s",
-                     joint.name.c_str(), joint.is_mimic == hardware_interface::MimicAttribute::TRUE ? "true" : "false");
+                    "Joint %s has no command interfaces defined, mimi is set to %s",
+                    joint.name.c_str(), joint.is_mimic == hardware_interface::MimicAttribute::TRUE ? "true" : "false");
       }
     }
 
     // for (size_t i = 0; i < joint_names_.size(); i++)
     // {
     //   // Only position command interface for each joint (no velocity commands)
-      
+
     //   command_interfaces.emplace_back(
     //     hardware_interface::CommandInterface(joint_names_[i], hardware_interface::HW_IF_POSITION, &joint_position_commands_[i]));
     // }
@@ -241,7 +251,7 @@ namespace xarm_hardware
       RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), "not connected");
 
       // Provide dummy joint positions for testing
-      for (size_t i = 0; i < joint_names_.size(); ++i)
+      for (size_t i = 0; i < joint_position_states_.size(); ++i)
       {
         joint_position_states_[i] = 0.0; // Default to 0 radians
         joint_velocity_states_[i] = 0.0; // Default to 0 rad/s
@@ -263,18 +273,19 @@ namespace xarm_hardware
       // if (joint.is_mimic == hardware_interface::MimicAttribute::TRUE)
       if (joint.command_interfaces.empty())
       {
-        //log message
+        // log message
         RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), "Mimic joint found: %s", joint.name.c_str());
       }
       else
       {
-        joint_position_states_[cnt] = hardware_to_ros(std::max(0.0, std::min(1000.0, current_positions[idx++])));
+        joint_position_states_[cnt] = hardware_to_ros(std::max(0.0, std::min(1000.0, current_positions[idx])));
         // log cnt and idx
-        RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), "cnt: %d, idx: %d, pos: %.2f", cnt, idx-1, joint_position_states_[cnt]);
+        RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), "cnt: %d, idx: %d, pos: %.2f", cnt, idx, joint_position_states_[cnt]);
         // joint_velocity_states_[cnt] = (current_positions[idx++] - prev_position[idx++]) / 0.01;
         // idx++;
       }
       cnt++;
+      idx++;
     }
 
     // iterate through mimic joints
@@ -293,11 +304,11 @@ namespace xarm_hardware
     //   prev_position[i] = joint_position_states_[i];
     // }
 
-    for (size_t i = 0; i < joint_names_.size() && i < current_positions.size(); ++i)
+    for (size_t i = 0; i < joint_position_states_.size() && i < current_positions.size(); ++i)
     {
 
       current_positions[i] = std::max(0.0, std::min(1000.0, current_positions[i])); // Clip to valid range
-      current_positions[i] = hardware_to_ros(current_positions[i]); // Transform to radians
+      current_positions[i] = hardware_to_ros(current_positions[i]);                 // Transform to radians
       // Update position state
       joint_position_states_[i] = (current_positions[i]);
 
