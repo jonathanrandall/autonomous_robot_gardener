@@ -95,12 +95,12 @@ namespace xarm_hardware
     RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), "Activating XArm Hardware...");
 
     // Initialize joint states to safe default values
-    for (size_t i = 0; i < joint_names_.size(); ++i)
-    {
-      joint_position_states_[i] = 0.0;   // Default to 0 radians
-      joint_velocity_states_[i] = 0.0;   // Default to 0 rad/s
-      joint_position_commands_[i] = 0.0; // Default to 0 radians
-    }
+    // for (size_t i = 0; i < joint_names_.size(); ++i)
+    // {
+    //   joint_position_states_[i] = 0.0;   // Default to 0 radians
+    //   joint_velocity_states_[i] = 0.0;   // Default to 0 rad/s
+    //   joint_position_commands_[i] = 0.0; // Default to 0 radians
+    // }
 
     RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), "XArm Hardware activated successfully");
 
@@ -163,27 +163,28 @@ namespace xarm_hardware
     std::vector<hardware_interface::CommandInterface> command_interfaces;
     // joint_position_commands_.clear();
 
-    // for (const auto &joint : info_.joints)
-    // {
-    //   if (!joint.command_interfaces.empty())
-    //   {
-    //     command_interfaces.emplace_back(
-    //         hardware_interface::CommandInterface(joint.name, joint.command_interfaces[0].name, &joint_position_commands_[&joint - &info_.joints[0]]));
-    //   }
-    //   else
-    //   {
-    //     RCLCPP_ERROR(rclcpp::get_logger("XArmHardware"),
-    //                  "Joint %s has no command interfaces defined, mimi is set to %s",
-    //                  joint.name.c_str(), joint.is_mimic == hardware_interface::MimicAttribute::TRUE ? "true" : "false");
-    //   }
-    // }
-
-    for (size_t i = 0; i < joint_names_.size(); i++)
+    for (const auto &joint : info_.joints)
     {
-      // Only position command interface for each joint (no velocity commands)
-      command_interfaces.emplace_back(
-        hardware_interface::CommandInterface(joint_names_[i], hardware_interface::HW_IF_POSITION, &joint_position_commands_[i]));
+      if (!joint.command_interfaces.empty())
+      {
+        command_interfaces.emplace_back(
+            hardware_interface::CommandInterface(joint.name, joint.command_interfaces[0].name, &joint_position_commands_[&joint - &info_.joints[0]]));
+      }
+      else
+      {
+        RCLCPP_INFO(rclcpp::get_logger("XArmHardware"),
+                     "Joint %s has no command interfaces defined, mimi is set to %s",
+                     joint.name.c_str(), joint.is_mimic == hardware_interface::MimicAttribute::TRUE ? "true" : "false");
+      }
     }
+
+    // for (size_t i = 0; i < joint_names_.size(); i++)
+    // {
+    //   // Only position command interface for each joint (no velocity commands)
+      
+    //   command_interfaces.emplace_back(
+    //     hardware_interface::CommandInterface(joint_names_[i], hardware_interface::HW_IF_POSITION, &joint_position_commands_[i]));
+    // }
 
     RCLCPP_INFO(rclcpp::get_logger("XArmHardware"),
                 "Exported %zu command interfaces", command_interfaces.size());
@@ -252,17 +253,21 @@ namespace xarm_hardware
     // RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), "Serial communication print, providing data for testing");
 
     // Update joint positions and calculate velocities
-    static std::vector<double> prev_position(6, 0.0);
+    static std::vector<double> prev_position(7, 0.0);
     int idx = 0;
     int cnt = 0;
     for (auto joint : info_.joints)
     {
       if (joint.is_mimic == hardware_interface::MimicAttribute::TRUE)
       {
+        //log message
+        RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), "Mimic joint found: %s", joint.name.c_str());
       }
       else
       {
         joint_position_states_[cnt] = hardware_to_ros(std::max(0.0, std::min(1000.0, current_positions[idx++])));
+        // log cnt and idx
+        RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), "cnt: %d, idx: %d, pos: %.2f", cnt, idx-1, joint_position_states_[cnt]);
         // joint_velocity_states_[cnt] = (current_positions[idx++] - prev_position[idx++]) / 0.01;
         // idx++;
       }
