@@ -217,28 +217,34 @@ namespace xarm_hardware
 
   double radians_to_gripper(int radians)
   {
-    return -radians / 40.0;
+    radians = std::max(-1.8326, std::min(0.75, (double)radians));
+    
     // first convert to radians, radians to gripper
 
-    double max_rads = -1.8326; // -105 degrees in radians
-    double min_rads = 0.75;
+    double min_rads = -1.8326; // -105 degrees in radians
+    double max_rads = 0.75;
     double min_ros = 0.0;   // -0.75 * M_PI;
     double max_ros = 0.028; // 0.75 * M_PI;
 
     return min_ros + ((radians - min_rads) / (max_rads - min_rads)) * (max_ros - min_ros);
+
   }
 
   double gripper_to_radians(double gripper_val_)
   {
-    return -40.0 * gripper_val_;
-    double max_rads = -1.8326; // -105 degrees in radians
-    double min_rads = 0.75;
+    // return -40.0 * gripper_val_;
+    double min_rads = -1.8326; // -105 degrees in radians
+    double max_rads = 0.75;
     double min_ros = 0.0;   //
     double max_ros = 0.028; //
 
     double gripper_val = min_rads + ((gripper_val_ - min_ros) / (max_ros - min_ros)) * (max_rads - min_rads);
+    gripper_val = std::max(min_rads, std::min(max_rads, gripper_val));
 
-    return std::max(max_rads, std::min(max_rads, gripper_val));
+    //log gripper val
+    RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), "Gripper val: %.2f", gripper_val);
+
+    return  gripper_val;
   }
 
   return_type XArmHardware::read(const rclcpp::Time & /*time*/, const rclcpp::Duration &period)
@@ -263,6 +269,9 @@ namespace xarm_hardware
     std::vector<double> current_positions = serial_comms_->read_joint_position(); // serial_comms_->get_joint_positions();
     // current_positions = serial_comms_->read_joint_position();
     // RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), "Serial communication print, providing data for testing");
+    // current_positions[0] = radians_to_gripper(current_positions[0]);
+    //log current positions[0]
+    RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), "Gripper position (radians): %.2f", current_positions[0]);
 
     // Update joint positions and calculate velocities
     static std::vector<double> prev_position(7, 0.0);
@@ -280,13 +289,15 @@ namespace xarm_hardware
       {
         joint_position_states_[cnt] = hardware_to_ros(std::max(0.0, std::min(1000.0, current_positions[idx])));
         // log cnt and idx
-        RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), "cnt: %d, idx: %d, pos: %.2f", cnt, idx, joint_position_states_[cnt]);
+        // RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), "cnt: %d, idx: %d, pos: %.2f", cnt, idx, joint_position_states_[cnt]);
         // joint_velocity_states_[cnt] = (current_positions[idx++] - prev_position[idx++]) / 0.01;
         // idx++;
       }
       cnt++;
       idx++;
     }
+
+    // joint_position_states_[0] = radians_to_gripper(joint_position_states_[0]);
 
     // iterate through mimic joints
     // for (auto mj : info_.mimic_joints)
@@ -344,7 +355,9 @@ namespace xarm_hardware
     // // zero is the gripper.
     // joint_position_commands_[0] = std::max(g_min, std::min(g_max, joint_position_commands_[0]));
     // // joint_position_commands_[0] = gripper_to_radians(joint_position_commands_[0]);
-    // joint_position_commands_[0] = gripper_to_radians(joint_position_commands_[0]);
+    joint_position_commands_[0] = gripper_to_radians(joint_position_commands_[0]);
+    // log joint position commands[0]
+    // RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), "Gripper command (radians): %.2f", joint_position_commands_[0]);
 
     bool success = set_joint_positions(joint_position_commands_);
     // serial_comms_->write_position();
