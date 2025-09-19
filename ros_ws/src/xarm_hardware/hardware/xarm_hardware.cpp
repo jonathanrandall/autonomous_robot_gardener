@@ -48,7 +48,7 @@ namespace xarm_hardware
     }
 
     // Initialize joint data for 6-DOF xArm trajectory controller
-    // joint_position_commands_.assign(cmd_interfaces_, 0.0);   // Only position commands
+    joint_position_commands_.assign(joint_names_.size(), 0.0);   // Only position commands
     joint_position_states_.assign(joint_names_.size(), 0.0); // Position states
     joint_velocity_states_.assign(joint_names_.size(), 0.0); // Velocity states (calculated)
 
@@ -134,6 +134,8 @@ namespace xarm_hardware
     return CallbackReturn::SUCCESS;
   }
 
+
+
   std::vector<hardware_interface::StateInterface> XArmHardware::export_state_interfaces()
   {
     std::vector<hardware_interface::StateInterface> state_interfaces;
@@ -155,78 +157,43 @@ namespace xarm_hardware
     return state_interfaces;
   }
 
-  std::vector<hardware_interface::CommandInterface>
-XArmHardware::export_command_interfaces()
-{
-  std::vector<hardware_interface::CommandInterface> command_interfaces;
-  joint_position_commands_.clear();
-
-  for (size_t i = 0; i < info_.joints.size(); ++i)
+ 
+  std::vector<hardware_interface::CommandInterface> XArmHardware::export_command_interfaces()
   {
-    const auto &joint = info_.joints[i];
+    std::vector<hardware_interface::CommandInterface> command_interfaces;
+    // joint_position_commands_.clear();
 
-    if (joint.is_mimic == hardware_interface::MimicAttribute::TRUE)
-      continue;  // mimic joints don't get their own command interface
+    // for (const auto &joint : info_.joints)
+    // {
+    //   if (!joint.command_interfaces.empty())
+    //   {
+    //     command_interfaces.emplace_back(
+    //         hardware_interface::CommandInterface(joint.name, joint.command_interfaces[0].name, &joint_position_commands_[&joint - &info_.joints[0]]));
+    //   }
+    //   else
+    //   {
+    //     RCLCPP_ERROR(rclcpp::get_logger("XArmHardware"),
+    //                  "Joint %s has no command interfaces defined, mimi is set to %s",
+    //                  joint.name.c_str(), joint.is_mimic == hardware_interface::MimicAttribute::TRUE ? "true" : "false");
+    //   }
+    // }
 
-    if (!joint.command_interfaces.empty())
+    for (size_t i = 0; i < joint_names_.size(); i++)
     {
-      joint_position_commands_.push_back(0.0);
+      // Only position command interface for each joint (no velocity commands)
       command_interfaces.emplace_back(
-        hardware_interface::CommandInterface(
-          joint.name,
-          joint.command_interfaces[0].name,
-          &joint_position_commands_.back()));
+        hardware_interface::CommandInterface(joint_names_[i], hardware_interface::HW_IF_POSITION, &joint_position_commands_[i]));
     }
-    else
-    {
-      RCLCPP_WARN(rclcpp::get_logger("XArmHardware"),
-                  "Joint %s has no command interface", joint.name.c_str());
-    }
+
+    RCLCPP_INFO(rclcpp::get_logger("XArmHardware"),
+                "Exported %zu command interfaces", command_interfaces.size());
+
+    return command_interfaces;
   }
-
-  RCLCPP_INFO(rclcpp::get_logger("XArmHardware"),
-              "Exported %zu command interfaces", command_interfaces.size());
-  return command_interfaces;
-}
-
-
-
-  // std::vector<hardware_interface::CommandInterface> XArmHardware::export_command_interfaces()
-  // {
-  //   std::vector<hardware_interface::CommandInterface> command_interfaces;
-  //   joint_position_commands_.clear();
-
-  //   for (const auto &joint : info_.joints)
-  //   {
-  //     if (!joint.command_interfaces.empty())
-  //     {
-  //       command_interfaces.emplace_back(
-  //           hardware_interface::CommandInterface(joint.name, joint.command_interfaces[0].name, &joint_position_commands_[&joint - &info_.joints[0]]));
-  //     }
-  //     else
-  //     {
-  //       RCLCPP_ERROR(rclcpp::get_logger("XArmHardware"),
-  //                    "Joint %s has no command interfaces defined, mimi is set to %s",
-  //                    joint.name.c_str(), joint.is_mimic == hardware_interface::MimicAttribute::TRUE ? "true" : "false");
-  //     }
-  //   }
-
-  //   // for (size_t i = 0; i < joint_names_.size(); i++)
-  //   // {
-  //   //   // Only position command interface for each joint (no velocity commands)
-  //   //   command_interfaces.emplace_back(
-  //   //     hardware_interface::CommandInterface(joint_names_[i], hardware_interface::HW_IF_POSITION, &joint_position_commands_[i]));
-  //   // }
-
-  //   RCLCPP_INFO(rclcpp::get_logger("XArmHardware"),
-  //               "Exported %zu command interfaces", command_interfaces.size());
-
-  //   return command_interfaces;
-  // }
 
   double hardware_to_ros(int ticks)
   {
-   //converts to radians
+    // converts to radians
     double min_hw = 0.0;
     double max_hw = 1000.0;
     double min_ros = -2.35619; // -0.75 * M_PI;
@@ -237,8 +204,9 @@ XArmHardware::export_command_interfaces()
 
   double radians_to_gripper(int radians)
   {
-    //first convert to radians, radians to gripper
-    
+    return -radians / 40.0;
+    // first convert to radians, radians to gripper
+
     double max_rads = -1.8326; // -105 degrees in radians
     double min_rads = 0.75;
     double min_ros = 0.0;   // -0.75 * M_PI;
@@ -249,6 +217,7 @@ XArmHardware::export_command_interfaces()
 
   double gripper_to_radians(double gripper_val_)
   {
+    return -40.0 * gripper_val_;
     double max_rads = -1.8326; // -105 degrees in radians
     double min_rads = 0.75;
     double min_ros = 0.0;   //
@@ -256,10 +225,8 @@ XArmHardware::export_command_interfaces()
 
     double gripper_val = min_rads + ((gripper_val_ - min_ros) / (max_ros - min_ros)) * (max_rads - min_rads);
 
-    return std::max(min_rads, std::min(max_rads, gripper_val));
-  } 
-
-
+    return std::max(max_rads, std::min(max_rads, gripper_val));
+  }
 
   return_type XArmHardware::read(const rclcpp::Time & /*time*/, const rclcpp::Duration &period)
   {
@@ -303,35 +270,35 @@ XArmHardware::export_command_interfaces()
     }
 
     // iterate through mimic joints
-    for (auto mj : info_.mimic_joints)
-    {
-      // auto joint = info_.joints[mj.joint_index];
-      joint_position_states_[mj.mimicked_joint_index] = radians_to_gripper(joint_position_states_[mj.mimicked_joint_index]);
-      joint_position_states_[mj.joint_index] = joint_position_states_[mj.mimicked_joint_index] * mj.multiplier + mj.offset;
-    }
+    // for (auto mj : info_.mimic_joints)
+    // {
+    //   // auto joint = info_.joints[mj.joint_index];
+    //   joint_position_states_[mj.mimicked_joint_index] = radians_to_gripper(joint_position_states_[mj.mimicked_joint_index]);
+    //   joint_position_states_[mj.joint_index] = joint_position_states_[mj.mimicked_joint_index] * mj.multiplier + mj.offset;
+    // }
 
     double delta_seconds = period.seconds();
 
-    for (size_t i = 0; i < joint_names_.size(); ++i)
-    {
-      joint_velocity_states_[i] = (joint_position_states_[i] - prev_position[i]) / (delta_seconds + 0.000001);
-      prev_position[i] = joint_position_states_[i];
-    }
-
-    // for (size_t i = 0; i < joint_names_.size() && i < current_positions.size(); ++i)
+    // for (size_t i = 0; i < joint_names_.size(); ++i)
     // {
-
-    //   current_positions[i] = std::max(0.0, std::min(1000.0, current_positions[i])); // Clip to valid range
-    //   current_positions[i] = hardware_to_ros(current_positions[i]); // Transform to radians
-    //   // Update position state
-    //   joint_position_states_[i] = (current_positions[i]);
-
-    //   // Calculate velocity state
-    //   joint_velocity_states_[i] = (current_positions[i] - prev_position[i]) / 0.01; // Assuming 10ms control loop
-
-    //   // Store current position for next iteration
-    //   prev_position[i] = current_positions[i];
+    //   joint_velocity_states_[i] = (joint_position_states_[i] - prev_position[i]) / (delta_seconds + 0.000001);
+    //   prev_position[i] = joint_position_states_[i];
     // }
+
+    for (size_t i = 0; i < joint_names_.size() && i < current_positions.size(); ++i)
+    {
+
+      current_positions[i] = std::max(0.0, std::min(1000.0, current_positions[i])); // Clip to valid range
+      current_positions[i] = hardware_to_ros(current_positions[i]); // Transform to radians
+      // Update position state
+      joint_position_states_[i] = (current_positions[i]);
+
+      // Calculate velocity state
+      joint_velocity_states_[i] = (current_positions[i] - prev_position[i]) / (delta_seconds + 0.000001); // Assuming 10ms control loop
+
+      // Store current position for next iteration
+      prev_position[i] = current_positions[i];
+    }
 
     return return_type::OK;
   }
@@ -353,11 +320,12 @@ XArmHardware::export_command_interfaces()
       return return_type::OK;
     }
 
-    double g_max = 0.028;
-    double g_min = 0.0;
-    //zero is the gripper.
-    joint_position_commands_[0] = std::max(g_min, std::min(g_max, joint_position_commands_[0]));
-    joint_position_commands_[0] = gripper_to_radians(joint_position_commands_[0]);
+    // double g_max = 0.028;
+    // double g_min = 0.0;
+    // // zero is the gripper.
+    // joint_position_commands_[0] = std::max(g_min, std::min(g_max, joint_position_commands_[0]));
+    // // joint_position_commands_[0] = gripper_to_radians(joint_position_commands_[0]);
+    // joint_position_commands_[0] = gripper_to_radians(joint_position_commands_[0]);
 
     bool success = set_joint_positions(joint_position_commands_);
     // serial_comms_->write_position();
@@ -392,7 +360,6 @@ XArmHardware::export_command_interfaces()
 
     // Transform positions from radians to 0-1000 range for ESP32
     std::vector<double> transformed_positions = transform_positions_for_esp32(positions);
-    
 
     // Delegate to SerialComms
     // RCLCPP_INFO(rclcpp::get_logger("XArmHardware"),

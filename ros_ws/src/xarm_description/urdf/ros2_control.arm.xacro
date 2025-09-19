@@ -33,10 +33,10 @@
 
         <!-- mirror here -->
 
-       <joint name="xarm_1_joint_mirror">
+       <!-- <joint name="xarm_1_joint_mirror">
             <state_interface name="position"/>
             <state_interface name="velocity"/>
-        </joint>
+        </joint> -->
       </xacro:if>
 
       <xacro:if value="${eef == 'eef_3_finger'}">
