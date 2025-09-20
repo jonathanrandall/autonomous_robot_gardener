@@ -95,14 +95,6 @@ namespace xarm_hardware
   {
     RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), "Activating XArm Hardware...");
 
-    // Initialize joint states to safe default values
-    // for (size_t i = 0; i < joint_names_.size(); ++i)
-    // {
-    //   joint_position_states_[i] = 0.0;   // Default to 0 radians
-    //   joint_velocity_states_[i] = 0.0;   // Default to 0 rad/s
-    //   joint_position_commands_[i] = 0.0; // Default to 0 radians
-    // }
-
     RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), "XArm Hardware activated successfully");
 
     return CallbackReturn::SUCCESS;
@@ -190,14 +182,6 @@ namespace xarm_hardware
       }
     }
 
-    // for (size_t i = 0; i < joint_names_.size(); i++)
-    // {
-    //   // Only position command interface for each joint (no velocity commands)
-
-    //   command_interfaces.emplace_back(
-    //     hardware_interface::CommandInterface(joint_names_[i], hardware_interface::HW_IF_POSITION, &joint_position_commands_[i]));
-    // }
-
     RCLCPP_INFO(rclcpp::get_logger("XArmHardware"),
                 "Exported %zu command interfaces", command_interfaces.size());
 
@@ -242,16 +226,13 @@ namespace xarm_hardware
     gripper_val = std::max(min_rads, std::min(max_rads, gripper_val));
 
     //log gripper val
-    RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), "Gripper val: %.2f", gripper_val);
+    // RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), "Gripper val: %.2f", gripper_val);
 
     return  gripper_val;
   }
 
   return_type XArmHardware::read(const rclcpp::Time & /*time*/, const rclcpp::Duration &period)
   {
-    // When serial communication is disabled, provide dummy data for testing
-    // RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), "Serial communication print, providing data for testing");
-
     if (!serial_comms_->is_running())
     {
       RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), "not connected");
@@ -267,53 +248,15 @@ namespace xarm_hardware
 
     // Read current joint positions from ESP32
     std::vector<double> current_positions = serial_comms_->read_joint_position(); // serial_comms_->get_joint_positions();
-    // current_positions = serial_comms_->read_joint_position();
-    // RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), "Serial communication print, providing data for testing");
-    // current_positions[0] = radians_to_gripper(current_positions[0]);
+   
     //log current positions[0]
-    RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), "Gripper position (radians): %.2f", current_positions[0]);
+    // RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), "Gripper position (radians): %.2f", current_positions[0]);
 
     // Update joint positions and calculate velocities
-    static std::vector<double> prev_position(7, 0.0);
-    int idx = 0;
-    int cnt = 0;
-    for (auto joint : info_.joints)
-    {
-      // if (joint.is_mimic == hardware_interface::MimicAttribute::TRUE)
-      if (joint.command_interfaces.empty())
-      {
-        // log message
-        RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), "Mimic joint found: %s", joint.name.c_str());
-      }
-      else
-      {
-        joint_position_states_[cnt] = hardware_to_ros(std::max(0.0, std::min(1000.0, current_positions[idx])));
-        // log cnt and idx
-        // RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), "cnt: %d, idx: %d, pos: %.2f", cnt, idx, joint_position_states_[cnt]);
-        // joint_velocity_states_[cnt] = (current_positions[idx++] - prev_position[idx++]) / 0.01;
-        // idx++;
-      }
-      cnt++;
-      idx++;
-    }
-
-    // joint_position_states_[0] = radians_to_gripper(joint_position_states_[0]);
-
-    // iterate through mimic joints
-    // for (auto mj : info_.mimic_joints)
-    // {
-    //   // auto joint = info_.joints[mj.joint_index];
-    //   joint_position_states_[mj.mimicked_joint_index] = radians_to_gripper(joint_position_states_[mj.mimicked_joint_index]);
-    //   joint_position_states_[mj.joint_index] = joint_position_states_[mj.mimicked_joint_index] * mj.multiplier + mj.offset;
-    // }
+    static std::vector<double> prev_position(joint_position_states_.size(), 0.0);
 
     double delta_seconds = period.seconds();
 
-    // for (size_t i = 0; i < joint_names_.size(); ++i)
-    // {
-    //   joint_velocity_states_[i] = (joint_position_states_[i] - prev_position[i]) / (delta_seconds + 0.000001);
-    //   prev_position[i] = joint_position_states_[i];
-    // }
 
     for (size_t i = 0; i < joint_position_states_.size() && i < current_positions.size(); ++i)
     {
@@ -352,33 +295,18 @@ namespace xarm_hardware
       return return_type::OK;
     }
 
-    // double g_max = 0.028;
-    // double g_min = 0.0;
-    // // zero is the gripper.
-    // joint_position_commands_[0] = std::max(g_min, std::min(g_max, joint_position_commands_[0]));
-    // // joint_position_commands_[0] = gripper_to_radians(joint_position_commands_[0]);
+    
     joint_position_commands_[0] = gripper_to_radians(joint_position_commands_[0]);
     // log joint position commands[0]
     // RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), "Gripper command (radians): %.2f", joint_position_commands_[0]);
 
     bool success = set_joint_positions(joint_position_commands_);
-    // serial_comms_->write_position();
-
-    // RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), "Serial  write 3");
 
     if (!success)
     {
       RCLCPP_WARN(rclcpp::get_logger("XArmHardware"), "Failed to send joint position commands to ESP32");
       return return_type::ERROR;
     }
-
-    // RCLCPP_INFO(rclcpp::get_logger("XArmHardware"), "Serial  write 4");
-
-    // Log position commands for debugging
-    // RCLCPP_INFO(rclcpp::get_logger("XArmHardware"),
-    //               "Position commands: [%.2f,%.2f,%.2f,%.2f,%.2f,%.2f]",
-    //               joint_position_commands_[0], joint_position_commands_[1], joint_position_commands_[2],
-    //               joint_position_commands_[3], joint_position_commands_[4], joint_position_commands_[5]);
 
     return return_type::OK;
   }
