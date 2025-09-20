@@ -330,6 +330,8 @@ namespace xarm_hardware
       prev_position[i] = current_positions[i];
     }
 
+    joint_position_states_[0] = radians_to_gripper(joint_position_states_[0]);
+
     return return_type::OK;
   }
 

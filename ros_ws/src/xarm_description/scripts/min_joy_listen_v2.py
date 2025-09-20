@@ -290,7 +290,17 @@ class JoyListener(BaseRobotGUI):
         self.current_joint_angles[4] = (joint_angles[0] - math.pi/2)
         self.current_joint_angles[3] = -joint_angles[1]
         # log joint angles
-        self.get_logger().info(f"Joint angles: {joint_angles}")
+        # self.get_logger().info(f"Joint angles: {joint_angles}")
+
+        y_clamped = max(0.05, min(l1+l2, y))  # Clamp y to [0, 0.36]
+        alpha = math.pi * (1.0 - ((y_clamped -0.05)/ (l1+l2 - 0.05)))
+        # self.get_logger().info(f"alpha angles: {alpha}, {y_clamped}, {y}, {l1+l2}")
+        
+
+        theta1 = -self.current_joint_angles[4]
+        theta2 = self.current_joint_angles[3]
+        theta3 = -(alpha - theta1 - theta2)
+        self.current_joint_angles[2] = theta3
 
 
         return solutions
