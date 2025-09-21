@@ -130,25 +130,6 @@
         </inertial>
     </link>
 
-    <!-- <link name="xarm_7_link">
-        <visual>
-            <origin rpy="0 0 0" xyz="0.0 0.0 0.0" />
-            <geometry>
-                <mesh filename="file://$(find xarm_description)/meshes/stls/link7_6dof.stl" scale="1.0 1.0 1.0" />
-            </geometry>
-            <material name="Blue" />
-        </visual>
-        <collision>
-            <origin rpy="0 0 0" xyz="0.0 0.0 0.0" />
-            <geometry>
-                <mesh filename="file://$(find xarm_description)/meshes/stls/link7_6dof.stl" scale="1.0 1.0 1.0" />
-            </geometry>
-        </collision>
-        <inertial>
-            <mass value="0.1" />
-            <inertia ixx="0.03" iyy="0.03" izz="0.03" ixy="0.0" ixz="0.0" iyz="0.0" />
-        </inertial>
-    </link> -->
 
     <xacro:if value="${eef == 'eef_2_finger'}">
         <link name="eef_base_link">
@@ -331,24 +312,6 @@
         <child link="xarm_4_link" />
     </joint>
 
-    <!-- <joint name="xarm_7_joint" type="revolute">
-        <origin rpy="0 0 0" xyz="0 0 0.090" />
-        <axis xyz="0 0 1" />
-        
-        <limit effort="1000" lower="-1.57" upper="1.57" velocity="1.0" />
-        
-        <parent link="xarm_4_link" />
-        <child link="xarm_7_link" />
-    </joint> -->
-<!-- 
-    <joint name="xarm_3_joint" type="revolute">
-        <origin rpy="0 0 0" xyz="0 0.0 0.030" />
-        <axis xyz="1 0 0" />
-        <limit effort="1000" lower="-1.740612146" upper="1.86797401" velocity="1.0" />
-        
-        <parent link="xarm_7_link" />
-        <child link="xarm_3_link" />
-    </joint> -->
 
     <joint name="xarm_3_joint" type="revolute">
         <origin rpy="0 0 0" xyz="0 0.0 0.093" />
