@@ -36,6 +36,7 @@ class JoyListener(BaseRobotGUI):
         
 
         self.rotational_axis = 0.0
+        self.gripper_value = 0.014  # Initial gripper value
 
         
 
@@ -46,8 +47,8 @@ class JoyListener(BaseRobotGUI):
         }
 
         # Current position and velocity
-        self.current_position = [0.06, 0.0, 0.06]  # Default from your test file
-        self.current_velocity = [0.0, 0.0, 0.0]  # Current velocity in m/s
+        self.current_position = [0.06, 0.0, 0.06, 0.0]  # Default from your test file
+        self.current_velocity = [0.0, 0.0, 0.0, 0.0]  # Current velocity in m/s
         
         self.previous_position = [0.0, 0.0, 0.36]
         self.current_joint_angles = [0.0] * len(self.joint_names)  # Initialize with zeros
@@ -66,10 +67,11 @@ class JoyListener(BaseRobotGUI):
         self.declare_parameter('axis_x', 2)
         self.declare_parameter('axis_y', 3)
         self.declare_parameter('axis_z', 7)
+        self.declare_parameter('axis_grip', 6)
 
-        # --- Button configuration (deprecated for Z, but still declared) ---
-        self.declare_parameter('button_z_up', 6)
-        self.declare_parameter('button_z_down', 8)
+        # # --- Button configuration (deprecated for Z, but still declared) ---
+        # self.declare_parameter('button_z_up', 6)
+        # self.declare_parameter('button_z_down', 8)
 
         # --- Movement parameters ---
         self.declare_parameter('position_increment', 0.01)
@@ -86,9 +88,10 @@ class JoyListener(BaseRobotGUI):
         self.axis_x = self.get_parameter('axis_x').get_parameter_value().integer_value
         self.axis_y = self.get_parameter('axis_y').get_parameter_value().integer_value
         self.axis_z = self.get_parameter('axis_z').get_parameter_value().integer_value
+        self.axis_grip = self.get_parameter('axis_grip').get_parameter_value().integer_value
 
-        self.button_z_up = self.get_parameter('button_z_up').get_parameter_value().integer_value
-        self.button_z_down = self.get_parameter('button_z_down').get_parameter_value().integer_value
+        # self.button_z_up = self.get_parameter('button_z_up').get_parameter_value().integer_value
+        # self.button_z_down = self.get_parameter('button_z_down').get_parameter_value().integer_value
 
         self.position_increment = self.get_parameter('position_increment').get_parameter_value().double_value
         self.update_rate_ms = self.get_parameter('update_rate_ms').get_parameter_value().integer_value
@@ -101,7 +104,7 @@ class JoyListener(BaseRobotGUI):
         # Debug print of all parameters
         self.get_logger().info(
             f"axis_x={self.axis_x}, axis_y={self.axis_y}, axis_z={self.axis_z}, "
-            f"button_z_up={self.button_z_up}, button_z_down={self.button_z_down}, "
+            # f"button_z_up={self.button_z_up}, button_z_down={self.button_z_down}, "
             f"position_increment={self.position_increment}, update_rate_ms={self.update_rate_ms}, "
             f"max_position_norm={self.max_position_norm}, "
             f"position_adjustment_factor={self.position_adjustment_factor}, "
@@ -137,6 +140,10 @@ class JoyListener(BaseRobotGUI):
         
         self.current_position[1] = 0.0
         self.current_position = (self.apply_safety_limits(self.current_position)).tolist()
+
+        self.gripper_value += self.current_velocity[3] * dt/5.0
+        self.gripper_value = min(self.gripper_value, self.joint_limits[self.joint_names[0]][1])
+        self.gripper_value = max(self.gripper_value, self.joint_limits[self.joint_names[0]][0])
         
         # Calculate IK and send position if velocity is non-zero
         
@@ -194,6 +201,12 @@ class JoyListener(BaseRobotGUI):
             self.current_velocity[2] = self.joy_state['axes'][self.axis_z] * max_velocity
         else:
             self.current_velocity[2] = 0.0    
+
+        # Process grip axis for rotational control
+        if abs(self.joy_state['axes'][self.axis_grip]) > 0.1:  # Deadzone
+            self.current_velocity[3] = self.joy_state['axes'][self.axis_grip] * max_velocity
+        else:
+            self.current_velocity[3] = 0.0
 
     
     def normalise_orientation(self, vec):
@@ -301,6 +314,7 @@ class JoyListener(BaseRobotGUI):
         theta2 = self.current_joint_angles[3]
         theta3 = -(alpha - theta1 - theta2)
         self.current_joint_angles[2] = theta3
+        self.current_joint_angles[0] = self.gripper_value
 
 
         return solutions

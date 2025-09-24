@@ -10,8 +10,9 @@ min_joy_listen_v2:
     axis_x: 3  # Axis 0 for X position (left/right)
     axis_y: 2  # Axis 1 for Y position (forward/backward)
     axis_z: 7  # Axis 7 for Z position (up/down)
+    axis_grip: 6  # Axis 5 for gripper control (open/close)
     
-    # Button configuration for Z position control (deprecated - now using axis 7)
+    # # Button configuration for Z position control (deprecated - now using axis 7)
     button_z_up: 6    # Button 6 for Z up (kept for backward compatibility)
     button_z_down: 8  # Button 8 for Z down (kept for backward compatibility)
     
