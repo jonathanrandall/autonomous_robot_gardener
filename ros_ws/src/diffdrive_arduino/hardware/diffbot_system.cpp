@@ -45,7 +45,7 @@ hardware_interface::CallbackReturn DiffDriveArduinoHardware::on_init(
   // cfg_.left_wheel_name = info_.hardware_parameters["left_wheel_name"];
   // cfg_.right_wheel_name = info_.hardware_parameters["right_wheel_name"];
   cfg_.loop_rate = std::stof(info_.hardware_parameters["loop_rate"]);
-  cfg_.radius = (std::stof(info_.hardware_parameters["wheel_radius"]))*100; // in cm
+  cfg_.radius = (std::stof(info_.hardware_parameters["wheel_radius"])); // in cm
   cfg_.device = info_.hardware_parameters["device"];
   cfg_.baud_rate = std::stoi(info_.hardware_parameters["baud_rate"]);
   cfg_.timeout_ms = std::stoi(info_.hardware_parameters["timeout_ms"]);
@@ -257,6 +257,8 @@ hardware_interface::return_type DiffDriveArduinoHardware::read(
     joint_position_states_[i]+=delta_seconds*joint_velocity_states_[i];
   }
 
+  // RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"), "vel: %f, %f, %f, %f", vel_cms[0], vel_cms[1], vel_cms[2], vel_cms[3]);
+
 
   
 
@@ -281,12 +283,18 @@ hardware_interface::return_type diffdrive_arduino ::DiffDriveArduinoHardware::wr
 
   int vel_cms[] = {0, 0, 0, 0};
 
+  // RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"), "wheel cmd: %f, %f, %f, %f", joint_velocity_commands_[0], joint_velocity_commands_[1], joint_velocity_commands_[2], joint_velocity_commands_[3]);
+
   for (int i = 0; i<4; i++){
     vel_cms[i] = (int) (joint_velocity_commands_[i]*(cfg_.radius));
     
   }
 
+  // RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"), "radius: %f", cfg_.radius);
+
   comms_.set_motor_values(vel_cms);
+
+  // RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"), "cmd: %d, %d, %d, %d", vel_cms[0], vel_cms[1], vel_cms[2], vel_cms[3]);
 
   // int motor_l_counts_per_loop = wheel_l_.cmd / wheel_l_.rads_per_count / cfg_.loop_rate;
   // int motor_r_counts_per_loop = wheel_r_.cmd / wheel_r_.rads_per_count / cfg_.loop_rate;

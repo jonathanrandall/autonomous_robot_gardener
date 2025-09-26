@@ -85,6 +85,19 @@ def generate_launch_description():
         )
     )
 
+    hiwonder_controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["hiwonder_xarm_controller"],
+    )
+
+    delayed_hiwonder_controller_spawner = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action=controller_manager,
+            on_start=[hiwonder_controller_spawner],
+        )
+    )
+
 
     # Code for delaying a node (I haven't tested how effective it is)
     # 
@@ -111,5 +124,6 @@ def generate_launch_description():
         twist_mux,
         delayed_controller_manager,
         delayed_diff_drive_spawner,
-        delayed_joint_broad_spawner
+        delayed_joint_broad_spawner,
+        delayed_hiwonder_controller_spawner
     ])
