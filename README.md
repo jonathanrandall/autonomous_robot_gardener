@@ -20,5 +20,13 @@ This directory contains:
 5. __chassis_bom.md__, chassis bill of materials
 6. __electronics_bom.md__, electronics bill of materials
 
+### esp32_controls_diffbot_serial directory
+This directory contains the code for the esp32 that drives the motors. This code interfaces with the hardware interface and uses a pid controller to set the speed of the wheels as instructed by the commands from the diff drive controller.
 
+### ros_ws/src directory
+This directory contains four ros2 packages that I have developed for this robot
+1. __autonomous_robot__: this is the package for the robot chassis, and also connects the robot arm to the chassis. This is updated from Josh Newans articubot one project
+2. __diffdrive_arduino__: this is the diff drive hardware interface for the esp32 and motor controllers. Its an updated version of Josh Newans diffdrive_arduino package. Josh uses an arduino and I didn't want to change the name incase I broke something. This is adapted for a four wheel drive robot.
+3. __xarm_description__: this is the description package for the xarm and contains the urdf as well as launch files to view the urdf in RViZ and simulation.
+4. __xarm_hardware__: ros2 control hardware interface for the hiwonder xarm with the esp32 board. 
 
