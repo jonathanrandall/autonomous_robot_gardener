@@ -2,6 +2,8 @@
 this is a repo for my autonomous robot gardener
 coming soon...
 
+![chassis picture](https://github.com/jonathanrandall/autonomous_robot_gardener/blob/main/docs/photos/chassis_pic1)
+
 # Bill of Materials (BOM)
 
 This project has separate BOMs for mechanical and electronic components:
