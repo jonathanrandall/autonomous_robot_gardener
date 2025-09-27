@@ -18,7 +18,9 @@ __Note:__ you can use something like an intellisense camera instead of the time 
 * Nylon stand offs. I would get two packs of these.
 * Four pin JST XH connectors. These are for the motor encoders, or use whatever is specified for your motor. 
 * Bullet extenders (female) to connect the motor to the motor encoders. I used these from GoBilda. ![SKU:3800-0013-0300](https://www.gobilda.com/3-5mm-bullet-lead-mh-fc-300mm-length/)
-* Dupont jumper wires. 
+* Dupont jumper wires.
+
+[Connections](https://github.com/jonathanrandall/autonomous_robot_gardener/blob/main/docs/photos/bottom_connections.png)
 
 #### __Powering the robot__
 * 3s lipo battery for the electronics.
@@ -33,6 +35,7 @@ __Note:__ you can use something like an intellisense camera instead of the time 
 * Fork lugs for connecting the wires if using terminal strips.
 * Red and Black wires. Make sure you use red for positive and black for ground.
 * Copper and/or nylon standoffs. I used 3M.
+
 
 
 
