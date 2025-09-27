@@ -8,3 +8,6 @@ This project has separate BOMs for mechanical and electronic components:
 
 - [Chassis BOM](docs/chassis_bom.md)  
 - [Electronics BOM](docs/electronics_bom.md)
+
+# Repo Structure overview:
+
