@@ -2,15 +2,6 @@
 this is a repo for my autonomous robot gardener
 coming soon...
 
-![chassis picture](https://github.com/jonathanrandall/autonomous_robot_gardener/blob/main/docs/photos/chassis_pic1)
-
-# Bill of Materials (BOM)
-
-This project has separate BOMs for mechanical and electronic components:
-
-- [Chassis BOM](docs/chassis_bom.md)  
-- [Electronics BOM](docs/electronics_bom.md)
-
 # Repo Structure overview
 
 ### docs directory:
@@ -32,3 +23,12 @@ This directory contains four ros2 packages that I have developed for this robot
 3. __xarm_description__: this is the description package for the xarm and contains the urdf as well as launch files to view the urdf in RViZ and simulation.
 4. __xarm_hardware__: ros2 control hardware interface for the hiwonder xarm with the esp32 board. 
 
+
+# Bill of Materials (BOM)
+![chassis picture](https://github.com/jonathanrandall/autonomous_robot_gardener/blob/main/docs/photos/chassis_pic1)
+
+
+This project has separate BOMs for mechanical and electronic components:
+
+- [Chassis BOM](docs/chassis_bom.md)  
+- [Electronics BOM](docs/electronics_bom.md)
