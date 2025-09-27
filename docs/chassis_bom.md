@@ -1,5 +1,5 @@
 
-![Chassis Assembly](https://github.com/jonathanrandall/autonomous_robot_gardener/blob/main/photos/chassis_build_1.JPEG)<br/>
+![Chassis Assembly](https://github.com/jonathanrandall/autonomous_robot_gardener/blob/main/docs/photos/chassis_build_1.JPEG)<br/>
 <ins>**parts list for chassis**</ins>
 * 2 X 432mm 1120 Series U-Channel (SKU: 1120-0017-0432)
 * 2 X 336mm 1120 Series U-Chaneel (SKU: 1120-0013-0336)
@@ -24,6 +24,7 @@
 * 4 X washers
 
 
-![attach motor](https://github.com/jonathanrandall/autonomous_robot_gardener/blob/main/photos/attach_motor.JPEG) ![pillow blocks](https://github.com/jonathanrandall/autonomous_robot_gardener/blob/main/photos/pillow_blocks.JPEG)<br/>
+![attach motor](https://github.com/jonathanrandall/autonomous_robot_gardener/blob/main/photos/attach_motor.JPEG) ![pillow blocks](https://github.com/jonathanrandall/autonomous_robot_gardener/blob/main/docs/photos/pillow_blocks.JPEG)<br/>
+
 
 
