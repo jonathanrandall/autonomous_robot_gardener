@@ -24,7 +24,8 @@
 * 4 X washers
 
 
-![attach motor](https://github.com/jonathanrandall/autonomous_robot_gardener/blob/main/photos/attach_motor.JPEG) ![pillow blocks](https://github.com/jonathanrandall/autonomous_robot_gardener/blob/main/docs/photos/pillow_blocks.JPEG)<br/>
+![attach motor](https://github.com/jonathanrandall/autonomous_robot_gardener/blob/main/docs/photos/attach_motor.JPEG) ![pillow blocks](https://github.com/jonathanrandall/autonomous_robot_gardener/blob/main/docs/photos/pillow_blocks.JPEG)<br/>
+
 
 
 
