@@ -11,7 +11,7 @@ from xarm_description.base_robot_gui import BaseRobotGUI
 
 def generate_launch_description():
     pkg_share = FindPackageShare('xarm_description').find('xarm_description')
-    xacro_file = os.path.join(pkg_share, 'urdf', 'xarm_v3.urdf')
+    xacro_file = os.path.join(pkg_share, 'urdf', 'xarm_v2.urdf')
     urdf_file = os.path.join(pkg_share, 'urdf', 'xarm_v3_ik.urdf')
     joystick_config = os.path.join(pkg_share, 'config', 'joystick_ik.yaml')
 
