@@ -1,0 +1,16 @@
+✅ How to use
+
+Save as camera_to_ee_tf.py inside your ROS 2 Python package (scripts/ folder).
+
+Make it executable:
+
+chmod +x camera_to_ee_tf.py
+Make sure your robot publishes TFs for:
+
+base_link → ee_link
+
+base_link → camera_link
+
+Run the node:
+
+ros2 run <your_package_name> camera_to_ee_tf.py
