@@ -1,7 +1,7 @@
 # autonomous_robot_gardener
 this is a repo for my autonomous robot gardener
 
-````markdown
+
 ## Getting Started
 
 Clone this repository:
@@ -37,7 +37,7 @@ To control the robot arm with a gamepad:
 ```bash
 ros2 launch xarm_description joystick_ik.launch.py
 ```
-````
+
 
 
 # Repo Structure overview
