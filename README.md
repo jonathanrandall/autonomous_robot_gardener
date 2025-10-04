@@ -46,7 +46,7 @@ ros2 launch xarm_description launch_sim.xarm.launch.py
 ---
 
 ## Hardware Code Notes
-I'm using the hiwonder xarm with the esp32 board. The micropython code is in the [xarm_software/micorpython_xarm_control](https://github.com/jonathanrandall/autonomous_robot_gardener/tree/main/xarm_software/micropython_xarm_control) directory
+I'm using the hiwonder xarm with the esp32 board. The micropython code is in the [xarm_software/micorpython_xarm_control](https://github.com/jonathanrandall/autonomous_robot_gardener/tree/main/xarm_software/micropython_xarm_control) directory. I used PyMakr to load it onto the esp32 board.
 
 The esp32 code for the motor control is in the [esp32_controls_diffbot_serial](https://github.com/jonathanrandall/autonomous_robot_gardener/tree/main/esp32_controls_diffbot_serial) directory
 
