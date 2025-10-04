@@ -1,6 +1,44 @@
 # autonomous_robot_gardener
 this is a repo for my autonomous robot gardener
-coming soon...
+
+````markdown
+## Getting Started
+
+Clone this repository:
+```bash
+git clone https://github.com/jonathanrandall/autonomous_robot_gardener.git
+```
+
+Navigate into the workspace:
+```bash
+cd autonomous_robot_gardener/ros_ws
+```
+
+Build the workspace:
+```bash
+colcon build --symlink-install
+```
+
+---
+
+## Running the Simulation
+
+To launch the simulation:
+```bash
+ros2 launch autonomous_robot launch_sim.launch.py
+```
+
+To view the robot arm in RViz:
+```bash
+ros2 launch xarm_description view_robot.launch.py
+```
+
+To control the robot arm with a gamepad:
+```bash
+ros2 launch xarm_description joystick_ik.launch.py
+```
+````
+
 
 # Repo Structure overview
 
