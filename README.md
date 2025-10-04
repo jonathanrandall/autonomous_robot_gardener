@@ -38,7 +38,10 @@ To control the robot arm with a gamepad:
 ros2 launch xarm_description joystick_ik.launch.py
 ```
 
-
+To launch just the robot arm in gazebo
+```bash
+ros2 launch xarm_description launch_sim.xarm.launch.py
+```
 
 # Repo Structure overview
 
