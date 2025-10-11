@@ -18,8 +18,8 @@ class ImageSyncProcessor(Node):
         # Interpolation parameters: [slope, intercept] for pixel shift calculation
         # interp_params[0] for distance < 30, interp_params[1] for distance >= 30
         self.interp_params = [
-            [0.0, 0.0],  # [slope, intercept] for distance < 30
-            [0.0, 0.0]   # [slope, intercept] for distance >= 30
+            [814, 5.89],  # [slope, intercept] for distance < 30
+            [1431, -6.43]   # [slope, intercept] for distance >= 30
         ]
 
         # Create subscribers for compressed images
@@ -108,7 +108,7 @@ class ImageSyncProcessor(Node):
             distance_img = (255.001 - tof_gray.astype(np.float32)) * 400.0 / 255.0
 
             # Create mask for distance threshold
-            mask_near = distance_img < 30.0  # True where distance < 30
+            mask_near = distance_img < 38.0  # True where distance < 30
 
             # Compute pixel shift for each pixel based on distance and interpolation params
             # pixel_shift = slope * (1/distance) + intercept
