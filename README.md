@@ -1,5 +1,7 @@
 # autonomous_robot_gardener
-this is a repo for my autonomous robot gardener
+this is a repo for my autonomous robot gardener.
+
+[explanatory video](https://youtu.be/5GHLeow5bYI)
 
 
 ## Getting Started
