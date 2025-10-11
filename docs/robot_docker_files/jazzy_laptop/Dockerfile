@@ -59,6 +59,8 @@ RUN apt-get update && \
         psmisc && \
     rm -rf /var/lib/apt/lists/*
 
+# sudo apt update
+# sudo apt install python3-tf-transformations
 # Rosdep update
 RUN rosdep update
 
@@ -73,6 +75,10 @@ RUN apt-get update && \
 RUN python3 -m venv /opt/venv && \ 
     /opt/venv/bin/pip install --upgrade pip setuptools wheel && \ 
     /opt/venv/bin/pip install ipython ipykernel ultralytics scikit-learn
+
+# Make sure you’re still root at this point
+# RUN sudo groupadd -r input && \
+#     sudo usermod -aG input ubuntu
 
 USER $USERNAME
 

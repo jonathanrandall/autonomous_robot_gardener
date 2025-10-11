@@ -35,7 +35,14 @@
         "-e", "DISPLAY=${localEnv:DISPLAY}",        // Pass display
         "-e", "XDG_RUNTIME_DIR=/tmp/runtime-${localUser}", // For Qt/Gazebo
         "-e", "XAUTHORITY=${localEnv:XAUTHORITY}", // Optional
-        "--group-add", "video"                      // Access GPU/video
+        "--group-add", "video",                      // Access GPU/video
+        "--network=host",
+        "--group-add=dialout"
+        // "--group-add=input"
+        // "--volume=/dev:/dev",
+        // "--device=/dev/input/js*:/dev/input/js*",
+        // "--device-cgroup-rule=c *:* rmw",
+        // "--volume=/run/udev:/run/udev:ro"
     ],
     "containerUser": "ubuntu",                     // non-root user
     "remoteUser": "ubuntu",
