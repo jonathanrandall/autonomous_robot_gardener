@@ -15,6 +15,13 @@ class ImageSyncProcessor(Node):
 
         self.bridge = CvBridge()
 
+        # Interpolation parameters: [slope, intercept] for pixel shift calculation
+        # interp_params[0] for distance < 30, interp_params[1] for distance >= 30
+        self.interp_params = [
+            [0.0, 0.0],  # [slope, intercept] for distance < 30
+            [0.0, 0.0]   # [slope, intercept] for distance >= 30
+        ]
+
         # Create subscribers for compressed images
         self.webcam_sub = message_filters.Subscriber(
             self,
@@ -94,9 +101,47 @@ class ImageSyncProcessor(Node):
             # Apply median filter to ToF image (kernel size 5)
             tof_filtered = cv2.medianBlur(tof_img, 5)
 
-            # Create overlay with 0.5 transparency for each image
+            # Convert ToF image to grayscale to compute distance
+            tof_gray = cv2.cvtColor(tof_filtered, cv2.COLOR_BGR2GRAY)
+
+            # Compute distance image: distance = (255.001 - gray_level) * 400 / 255
+            distance_img = (255.001 - tof_gray.astype(np.float32)) * 400.0 / 255.0
+
+            # Create mask for distance threshold
+            mask_near = distance_img < 30.0  # True where distance < 30
+
+            # Compute pixel shift for each pixel based on distance and interpolation params
+            # pixel_shift = slope * (1/distance) + intercept
+            # Avoid division by zero
+            distance_img_safe = np.where(distance_img > 0.001, distance_img, 0.001)
+
+            pixel_shift = np.zeros_like(distance_img)
+
+            # Apply near parameters (distance < 30)
+            slope_near, intercept_near = self.interp_params[0]
+            pixel_shift[mask_near] = slope_near * (1.0 / distance_img_safe[mask_near]) + intercept_near
+
+            # Apply far parameters (distance >= 30)
+            slope_far, intercept_far = self.interp_params[1]
+            pixel_shift[~mask_near] = slope_far * (1.0 / distance_img_safe[~mask_near]) + intercept_far
+
+            # Create shifted webcam overlay
+            # For each pixel in tof image, sample from webcam at position shifted to the right
+            height, width = tof_filtered.shape[:2]
+            webcam_shifted = np.zeros_like(webcam_scaled)
+
+            for y in range(height):
+                for x in range(width):
+                    shift = int(round(pixel_shift[y, x]))
+                    source_x = x + shift
+
+                    # Bounds check
+                    if 0 <= source_x < width:
+                        webcam_shifted[y, x] = webcam_scaled[y, source_x]
+
+            # Create overlay with 0.3/0.7 transparency
             overlay = cv2.addWeighted(
-                webcam_scaled, 0.3,
+                webcam_shifted, 0.3,
                 tof_filtered, 0.7,
                 0
             )
