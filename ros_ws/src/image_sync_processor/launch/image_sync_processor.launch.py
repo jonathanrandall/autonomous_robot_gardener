@@ -10,6 +10,7 @@ def generate_launch_description():
             name='image_sync_processor',
             output='screen',
             parameters=[],
-            remappings=[]
+            remappings=[],
+            prefix='/opt/venv/bin/python3'
         )
     ])

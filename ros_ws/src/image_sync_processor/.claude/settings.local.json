@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//workspaces/jazzy_docker/autonomous_robot_gardener/ros_ws/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
