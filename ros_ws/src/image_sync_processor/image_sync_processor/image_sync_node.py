@@ -8,6 +8,7 @@ import message_filters
 import cv2
 import numpy as np
 from sklearn.cluster import KMeans
+from ultralytics import YOLO
 
 hex_colors = [
     "#1f77b4",  # blue
@@ -34,6 +35,9 @@ class ImageSyncProcessor(Node):
         super().__init__('image_sync_processor')
 
         self.bridge = CvBridge()
+
+        # Load YOLO model (will auto-download if not found)
+        self.yolo_model = YOLO('yolo11s.pt')
 
         # Interpolation parameters: [slope, intercept] for pixel shift calculation
         # interp_params[0] for distance < 30, interp_params[1] for distance >= 30
@@ -271,7 +275,46 @@ class ImageSyncProcessor(Node):
                         self.get_logger().error(f'IndexError at i={i}, len(stats)={len(stats)}, len(segmentation_masks)={len(segmentation_masks)}, len(shifts_to_use)={len(shifts_to_use)}')
 
                 img_out = webcam_scaled.copy()
-                self.draw_instance_segmentation_masks(img_out, shifted_masks)
+                # self.draw_instance_segmentation_masks(img_out, shifted_masks)
+
+                # Run YOLOv11 detection on webcam_scaled
+                results = self.yolo_model(webcam_scaled, verbose=False)
+
+                # Process each detection
+                for result in results:
+                    boxes = result.boxes
+                    for box in boxes:
+                        # Get bounding box coordinates
+                        x1, y1, x2, y2 = map(int, box.xyxy[0].cpu().numpy())
+                        conf = float(box.conf[0])
+                        cls = int(box.cls[0])
+
+                        # Create detection mask for overlap calculation
+                        det_mask = np.zeros((webcam_scaled.shape[0], webcam_scaled.shape[1]), dtype=bool)
+                        det_mask[y1:y2, x1:x2] = True
+
+                        # Find shifted_mask with biggest overlap
+                        max_overlap = 0
+                        best_idx = -1
+                        for idx, shifted_mask in enumerate(shifted_masks):
+                            overlap = np.sum(det_mask & shifted_mask)
+                            if overlap > max_overlap:
+                                max_overlap = overlap
+                                best_idx = idx
+
+                        # Get distance from dists array
+                        if best_idx >= 0:
+                            distance = dists[best_idx]
+
+                            # Draw bounding box on img_out
+                            cv2.rectangle(img_out, (x1, y1), (x2, y2), (0, 255, 0), 2)
+
+                            # Draw distance label
+                            label = f"{self.yolo_model.names[cls]} {distance:.1f}cm"
+                            label_size, _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 2)
+                            cv2.rectangle(img_out, (x1, y1 - label_size[1] - 10), (x1 + label_size[0], y1), (0, 255, 0), -1)
+                            cv2.putText(img_out, label, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
+
                 overlay = img_out
 
 
