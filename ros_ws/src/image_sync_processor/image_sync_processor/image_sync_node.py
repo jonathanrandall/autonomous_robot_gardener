@@ -69,7 +69,8 @@ class ImageSyncProcessor(Node):
             webcam_img = cv2.imdecode(webcam_np, cv2.IMREAD_COLOR)
 
             tof_np = np.frombuffer(tof_msg.data, np.uint8)
-            tof_img = cv2.imdecode(tof_np, cv2.IMREAD_COLOR)
+            tof_img = cv2.imdecode(tof_np, cv2.IMREAD_GRAYSCALE)
+            # tof_img = cv2.imdecode(tof_np, cv2.IMREAD_COLOR)
 
             if webcam_img is None or tof_img is None:
                 self.get_logger().warn('Failed to decode one or both images')
@@ -80,10 +81,10 @@ class ImageSyncProcessor(Node):
             tof_time = tof_msg.header.stamp.sec + tof_msg.header.stamp.nanosec * 1e-9
             time_diff = abs(webcam_time - tof_time)
 
-            self.get_logger().info(
-                f'Synchronized images - Time diff: {time_diff*1000:.2f}ms, '
-                f'Webcam: {webcam_img.shape}, ToF: {tof_img.shape}'
-            )
+            # self.get_logger().info(
+            #     f'Synchronized images - Time diff: {time_diff*1000:.2f}ms, '
+            #     f'Webcam: {webcam_img.shape}, ToF: {tof_img.shape}'
+            # )
 
             # Crop top 15% of webcam image
             webcam_height = webcam_img.shape[0]
@@ -102,10 +103,11 @@ class ImageSyncProcessor(Node):
             tof_filtered = cv2.medianBlur(tof_img, 5)
 
             # Convert ToF image to grayscale to compute distance
-            tof_gray = cv2.cvtColor(tof_filtered, cv2.COLOR_BGR2GRAY)
+            # tof_gray = cv2.cvtColor(tof_filtered, cv2.COLOR_BGR2GRAY)
+            tof_gray = tof_filtered
 
             # Compute distance image: distance = (255.001 - gray_level) * 400 / 255
-            distance_img = (255.001 - tof_gray.astype(np.float32)) * 400.0 / 255.0
+            distance_img = (255.001 - tof_gray.astype(np.float32)) * 200.0 / 255.0
 
             # Create mask for distance threshold
             mask_near = distance_img < 38.0  # True where distance < 30
@@ -113,7 +115,8 @@ class ImageSyncProcessor(Node):
             # Compute pixel shift for each pixel based on distance and interpolation params
             # pixel_shift = slope * (1/distance) + intercept
             # Avoid division by zero
-            distance_img_safe = np.where(distance_img > 0.001, distance_img, 0.001)
+            # distance_img_safe = np.where(distance_img > 0.001, distance_img, 0.001)
+            distance_img_safe = np.where(distance_img > 150, 175, distance_img)
 
             pixel_shift = np.zeros_like(distance_img)
 
@@ -130,18 +133,19 @@ class ImageSyncProcessor(Node):
             height, width = tof_filtered.shape[:2]
             webcam_shifted = np.zeros_like(webcam_scaled)
 
-            for y in range(height):
-                for x in range(width):
-                    shift = int(round(pixel_shift[y, x]))
-                    source_x = x + shift
+            # for y in range(height):
+            #     for x in range(width):
+            #         shift = int(round(pixel_shift[y, x]))
+            #         # self.get_logger().info(f'Pixel ({x},{y}): Distance={distance_img[y,x]:.2f}, Shift={shift}')    
+            #         source_x = x + shift
 
-                    # Bounds check
-                    if 0 <= source_x < width:
-                        webcam_shifted[y, x] = webcam_scaled[y, source_x]
+            #         # Bounds check
+            #         if 0 <= source_x < width:
+            #             webcam_shifted[y, x] = webcam_scaled[y, source_x]
 
             # Create overlay with 0.3/0.7 transparency
             overlay = cv2.addWeighted(
-                webcam_shifted, 0.3,
+                webcam_scaled, 0.3,
                 tof_filtered, 0.7,
                 0
             )
