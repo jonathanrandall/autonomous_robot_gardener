@@ -1,0 +1,7 @@
+<!DOCTYPE FilterScript>
+<FilterScript>
+  <filter name="Transform: Translate, Center, set Origin">
+    <Param name="traslMethod" value="1" type="RichEnum"/>
+  </filter>
+</FilterScript>
+
