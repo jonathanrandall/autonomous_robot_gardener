@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" >
+  <xacro:include filename="$(find autonomous_robot)/description/pan_tilt_xacros/pan_tilt.xacro"/>
+
+
+
+  <!-- Instantiate the pan-tilt mechanism -->
+  <xacro:pan_tilt_mechanism parent="chassis">
+    <origin xyz="${chassis_length/2} -${chassis_width/4} ${chassis_height+0.1}" rpy="0 0.18 0"/>
+  </xacro:pan_tilt_mechanism>
+
+</robot>
