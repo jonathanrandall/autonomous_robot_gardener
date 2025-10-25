@@ -22,12 +22,12 @@
     <xacro:property name="camera_width" value="0.025"/>
     <xacro:property name="camera_height" value="0.025"/>
 
-    <xacro:property name="camera_mount_l" value="0.09"/>
-    <xacro:property name="camera_mount_w" value="0.068"/>
+    <xacro:property name="camera_mount_w" value="0.09"/>
+    <xacro:property name="camera_mount_l" value="0.068"/>
     <xacro:property name="camera_mount_h" value="0.085"/>
 
     <xacro:property name="pan_tilt_leg_l" value="0.025"/>
-    <xacro:property name="pan_tilt_leg_2" value="0.058"/>
+    <xacro:property name="pan_tilt_leg_w" value="0.058"/>
     <xacro:property name="pan_tilt_leg_h" value="0.065"/>
 
     <!-- Mount Properties -->
@@ -45,6 +45,14 @@
 
     <material name="camera_black">
       <color rgba="0.05 0.05 0.05 1.0"/>
+    </material>
+
+    <material name="camera_red">
+      <color rgba="0.8 0.05 0.05 1.0"/>
+    </material>
+
+    <material name="camera_blue">
+      <color rgba="0.05 0.05 0.8 1.0"/>
     </material>
 
     <!-- Base Link -->
@@ -259,7 +267,7 @@
           <mesh filename="file://$(find image_sync_processor)/meshes/stls/pi_stand_final_v2-Body_v2_fixed.stl" scale="0.001 0.001 0.001" />
           <!-- <box size="${camera_length} ${camera_width} ${camera_height}"/> -->
         </geometry>
-        <material name="camera_black"/>
+        <material name="camera_blue"/>
       </visual>
       <collision>
         <origin xyz="0 0 0" rpy="0 0 1.57"/>
@@ -284,15 +292,71 @@
       <child link="pan_tilt_camera_link"/>
     </joint>
 
+    <!-- Camera Link -->
+    <link name="rgb_camera_link">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <box size="${camera_length} ${camera_width} ${camera_height}"/>
+        </geometry>
+        <material name="camera_red"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <box size="${camera_length} ${camera_width} ${camera_height}"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.01"/>
+        <inertia ixx="0.000001" ixy="0.0" ixz="0.0"
+                 iyy="0.000001" iyz="0.0"
+                 izz="0.000001"/>
+      </inertial>
+    </link>
+
+    <joint name="rgb_camera_joint" type="fixed">
+      <origin xyz="${camera_mount_l/2} 0 0" rpy="0 0 0"/>
+      <!-- <origin xyz="0 0 0" rpy="0 0 0"/> -->
+      <parent link="pan_tilt_camera_link"/>
+      <child link="rgb_camera_link"/>
+    </joint>
+
     <!-- Camera Optical Frame (for proper ROS camera convention) -->
-    <link name="pan_tilt_camera_optical_link"/>
+    <link name="rgb_camera_optical_link"/>
 
     <joint name="camera_optical_joint" type="fixed">
       <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
-      <parent link="pan_tilt_camera_link"/>
-      <child link="pan_tilt_camera_optical_link"/>
+      <parent link="rgb_camera_link"/>
+      <child link="rgb_camera_optical_link"/>
     </joint>
 
   </xacro:macro>
+
+  <gazebo reference="rgb_camera_link">
+    <material>Gazebo/Black</material>
+
+    <sensor name="camera" type="camera">
+      <pose> 0 0 0 0 0 0 </pose>
+      <visualize>true</visualize>
+      <update_rate>10</update_rate>
+      <camera>
+        <camera_info_topic>camera/camera_info</camera_info_topic>
+        <horizontal_fov>1.089</horizontal_fov>
+        <image>
+          <format>R8G8B8</format>
+          <width>640</width>
+          <height>480</height>
+        </image>
+        <clip>
+          <near>0.05</near>
+          <far>8.0</far>
+        </clip>
+      </camera>
+      <topic>camera/image_raw</topic>
+      <gz_frame_id>rgb_camera_optical_link</gz_frame_id>
+  </sensor>
+  </gazebo>
 
 </robot>
