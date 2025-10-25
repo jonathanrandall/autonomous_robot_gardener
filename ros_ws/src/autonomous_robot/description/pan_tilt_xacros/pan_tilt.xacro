@@ -22,8 +22,16 @@
     <xacro:property name="camera_width" value="0.025"/>
     <xacro:property name="camera_height" value="0.025"/>
 
+    <xacro:property name="camera_mount_l" value="0.09"/>
+    <xacro:property name="camera_mount_w" value="0.068"/>
+    <xacro:property name="camera_mount_h" value="0.085"/>
+
+    <xacro:property name="pan_tilt_leg_l" value="0.025"/>
+    <xacro:property name="pan_tilt_leg_2" value="0.058"/>
+    <xacro:property name="pan_tilt_leg_h" value="0.065"/>
+
     <!-- Mount Properties -->
-    <xacro:property name="mount_thickness" value="0.003"/>
+    <xacro:property name="mount_thickness" value="0.0052"/>
     <xacro:property name="bracket_height" value="0.04"/>
 
     <!-- Materials -->
@@ -137,20 +145,22 @@
     <!-- Pan Link (Rotating part controlled by pan servo) -->
     <link name="pan_link">
       <visual>
-        <origin xyz="0 0 ${bracket_height/2}" rpy="0 0 0"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <box size="${mount_thickness} ${servo_width + 0.01} ${bracket_height/4}"/>
+          <mesh filename="file://$(find image_sync_processor)/meshes/stls/PAN-TILT_ROTOR_V2_fixed.stl" scale="0.001 0.001 0.001" />
+          <!-- <box size="${mount_thickness} ${servo_width + 0.01} ${bracket_height/4}"/> -->
         </geometry>
         <material name="bracket_gray"/>
       </visual>
       <collision>
         <origin xyz="0 0 ${bracket_height/2}" rpy="0 0 0"/>
         <geometry>
-          <box size="${mount_thickness} ${servo_width + 0.01} ${bracket_height/4}"/>
+          <mesh filename="file://$(find image_sync_processor)/meshes/stls/PAN-TILT_ROTOR_V2_fixed.stl" scale="0.001 0.001 0.001" />
+          <!-- <box size="${mount_thickness} ${servo_width + 0.01} ${bracket_height/4}"/> -->
         </geometry>
       </collision>
       <inertial>
-        <origin xyz="0 0 ${bracket_height/4}" rpy="0 0 0"/>
+        <origin xyz="0 0 ${bracket_height/2}" rpy="0 0 0"/>
         <mass value="0.02"/>
         <inertia ixx="0.000005" ixy="0.0" ixz="0.0"
                  iyy="0.000005" iyz="0.0"
@@ -159,7 +169,8 @@
     </link>
 
     <joint name="pan_joint" type="revolute">
-      <origin xyz="0 0 ${servo_height/2 + servo_horn_height}" rpy="0 0 0"/>
+      <!-- <origin xyz="0 0 ${servo_height/2 + servo_horn_height}" rpy="0 0 0"/> -->
+      <origin xyz="0 0 ${servo_height + servo_horn_height}" rpy="0 0 0"/>
       <parent link="pan_servo_link"/>
       <child link="pan_link"/>
       <axis xyz="0 0 1"/>
@@ -195,7 +206,7 @@
     </link>
 
     <joint name="tilt_servo_joint" type="fixed">
-      <origin xyz="0 0 ${bracket_height-0.01}" rpy="0 0 0"/>
+      <origin xyz="0 0 ${mount_thickness*2}" rpy="0 0 0"/>
       <parent link="pan_link"/>
       <child link="tilt_servo_link"/>
     </joint>
@@ -242,9 +253,10 @@
     <!-- Camera Link -->
     <link name="pan_tilt_camera_link">
       <visual>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <origin xyz="0 0 0" rpy="0 0 1.57"/>
         <geometry>
-          <box size="${camera_length} ${camera_width} ${camera_height}"/>
+          <mesh filename="file://$(find image_sync_processor)/meshes/stls/pi_stand_final_v2-Body_v2_fixed.stl" scale="0.001 0.001 0.001" />
+          <!-- <box size="${camera_length} ${camera_width} ${camera_height}"/> -->
         </geometry>
         <material name="camera_black"/>
       </visual>
@@ -264,7 +276,7 @@
     </link>
 
     <joint name="camera_mount_joint" type="fixed">
-      <origin xyz="0 -${camera_height + servo_height} 0" rpy="0 1.57 -1.57"/>
+      <origin xyz="0 -${pan_tilt_leg_h/2 +0.022+ camera_mount_h/2} 0" rpy="0 1.57 -1.57"/>
       <!-- <origin xyz="0 0 0" rpy="0 0 0"/> -->
       <parent link="tilt_link"/>
       <child link="pan_tilt_camera_link"/>

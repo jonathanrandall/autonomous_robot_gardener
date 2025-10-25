@@ -4,32 +4,47 @@ from stl import mesh
 import numpy as np
 import sys
 
+
+def get_bounding_box_dimensions(stl_mesh):
+    """Return bounding-box dimensions (dx, dy, dz), and (min, max) coordinates.
+
+    Args:
+        stl_mesh: instance of stl.mesh.Mesh
+
+    Returns:
+        dims: numpy array [dx, dy, dz]
+        bbox_min: numpy array [min_x, min_y, min_z]
+        bbox_max: numpy array [max_x, max_y, max_z]
+    """
+    vertices = stl_mesh.vectors.reshape(-1, 3)
+    bbox_min = vertices.min(axis=0)
+    bbox_max = vertices.max(axis=0)
+    dims = bbox_max - bbox_min
+    return dims, bbox_min, bbox_max
+
 # Get input and output filenames
 if len(sys.argv) > 1:
     input_file = sys.argv[1]
     output_file = sys.argv[2] if len(sys.argv) > 2 else input_file.replace('.stl', '_fixed.stl')
 else:
-    input_file = 'PAN-TILT_LEG_V2.stl'
-    output_file = 'PAN-TILT_LEG_V2_fixed.stl'
+    input_file = 'pi_stand_final_v2-Body_v2.stl'
+    output_file = 'pi_stand_final_v2-Body_v2_fixed.stl'
 
 # Load the STL file
 stl_mesh = mesh.Mesh.from_file(input_file)
 
-# Get all vertices (reshape from faces to individual vertices)
-vertices = stl_mesh.vectors.reshape(-1, 3)
+# Get bounding-box dims and show them
+dims, bbox_min, bbox_max = get_bounding_box_dimensions(stl_mesh)
+print(f'Bounding box min: {bbox_min}, max: {bbox_max}, dims (x,y,z): {dims}')
 
-# Calculate bounding box center
-bbox_center = (vertices.max(axis=0) + vertices.min(axis=0)) / 2
-
+# Calculate bounding box center and center the mesh
+bbox_center = (bbox_max + bbox_min) / 2
 print(f'Bounding box center before: {bbox_center}')
-
-# Center the mesh by translating all vertices
 stl_mesh.vectors -= bbox_center
 
-# Verify new center
-vertices_new = stl_mesh.vectors.reshape(-1, 3)
-bbox_center_new = (vertices_new.max(axis=0) + vertices_new.min(axis=0)) / 2
-print(f'Bounding box center after: {bbox_center_new}')
+# Verify new bounding box/dimensions after centering
+dims_new, bbox_min_new, bbox_max_new = get_bounding_box_dimensions(stl_mesh)
+print(f'Bounding box min after: {bbox_min_new}, max after: {bbox_max_new}, dims after: {dims_new}')
 
 # Save the centered mesh
 stl_mesh.save(output_file)
