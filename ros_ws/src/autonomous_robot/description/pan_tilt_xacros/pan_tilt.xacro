@@ -91,7 +91,8 @@
       <collision>
         <origin xyz="0 0 ${servo_height/2}" rpy="1.57 0 0"/>
         <geometry>
-          <mesh filename="file://$(find image_sync_processor)/meshes/stls/PAN-TILT_BASE_V1_fixed.dae" scale="0.001 0.001 0.001" />
+          <mesh filename="file://$(find image_sync_processor)/meshes/stls/PAN-TILT_BASE_V1_fixed.stl" scale="0.001 0.001 0.001" />
+          <!-- <mesh filename="file://$(find image_sync_processor)/meshes/stls/PAN-TILT_BASE_V1_fixed.dae" scale="0.001 0.001 0.001" /> -->
           <!-- <box size="${servo_length} ${servo_width} ${servo_height}"/> -->
         </geometry>
       </collision>
@@ -153,14 +154,16 @@
         <material name="bracket_gray"/>
       </visual>
       <collision>
-        <origin xyz="0 0 ${bracket_height/2}" rpy="0 0 0"/>
+        <!-- <origin xyz="0 0 ${bracket_height/2}" rpy="0 0 0"/> -->
+        <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
           <mesh filename="file://$(find image_sync_processor)/meshes/stls/PAN-TILT_ROTOR_V2_fixed.stl" scale="0.001 0.001 0.001" />
           <!-- <box size="${mount_thickness} ${servo_width + 0.01} ${bracket_height/4}"/> -->
         </geometry>
       </collision>
       <inertial>
-        <origin xyz="0 0 ${bracket_height/2}" rpy="0 0 0"/>
+        <!-- <origin xyz="0 0 ${bracket_height/2}" rpy="0 0 0"/> -->
+        <origin xyz="0 0 0" rpy="0 0 0"/>
         <mass value="0.02"/>
         <inertia ixx="0.000005" ixy="0.0" ixz="0.0"
                  iyy="0.000005" iyz="0.0"
@@ -223,7 +226,7 @@
         <material name="bracket_gray"/>
       </visual>
       <collision>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <origin xyz="0 -0.022 0" rpy="0 0 0"/>
         <!-- <origin xyz="-${servo_length/4 + 0.01} 0 ${servo_length}" rpy="-1.57 0 1.57"/> -->
         <geometry>
           <!-- <box size="${servo_length + 0.02} ${servo_width + 0.01} ${mount_thickness}"/> -->
@@ -231,7 +234,7 @@
         </geometry>
       </collision>
       <inertial>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <origin xyz="0 -0.022 0" rpy="0 0 0"/>
         <!-- <origin xyz="-${servo_length/4 + 0.01} 0 ${servo_length}" rpy="-1.57 0 1.57"/> -->
         <mass value="0.02"/>
         <inertia ixx="0.000001" ixy="0.0" ixz="0.0"
@@ -261,13 +264,14 @@
         <material name="camera_black"/>
       </visual>
       <collision>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <origin xyz="0 0 0" rpy="0 0 1.57"/>
         <geometry>
-          <box size="${camera_length} ${camera_width} ${camera_height}"/>
+          <!-- <box size="${camera_length} ${camera_width} ${camera_height}"/> -->
+          <mesh filename="file://$(find image_sync_processor)/meshes/stls/pi_stand_final_v2-Body_v2_fixed.stl" scale="0.001 0.001 0.001" />
         </geometry>
       </collision>
       <inertial>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <origin xyz="0 0 0" rpy="0 0 1.57"/>
         <mass value="0.01"/>
         <inertia ixx="0.000001" ixy="0.0" ixz="0.0"
                  iyy="0.000001" iyz="0.0"
