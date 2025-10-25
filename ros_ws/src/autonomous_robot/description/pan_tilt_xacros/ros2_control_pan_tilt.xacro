@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- Simulation in Gazebo -->
+    <xacro:if value="$(arg sim_mode)">
+        <ros2_control name="PanTiltSystem" type="system">
+            <hardware>
+                <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+            </hardware>
+
+            <!-- Pan joint -->
+            <joint name="pan_joint">
+                <command_interface name="position">
+                    <param name="min">-3.14159</param>
+                    <param name="max">3.14159</param>
+                </command_interface>
+                <state_interface name="position"/>
+                <state_interface name="velocity"/>
+            </joint>
+
+            <!-- Tilt joint -->
+            <joint name="tilt_joint">
+                <command_interface name="position">
+                    <param name="min">-1.5708</param>
+                    <param name="max">1.5708</param>
+                </command_interface>
+                <state_interface name="position"/>
+                <state_interface name="velocity"/>
+            </joint>
+        </ros2_control>
+    </xacro:if>
+
+</robot>

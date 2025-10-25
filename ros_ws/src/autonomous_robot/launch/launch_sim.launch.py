@@ -90,6 +90,12 @@ def generate_launch_description():
         arguments=["hiwonder_xarm_controller"],
     )
 
+    pan_tilt_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["pan_tilt_controller"],
+    )
+
     joint_broad_spawner = Node(
         package="controller_manager",
         executable="spawner",
@@ -150,9 +156,10 @@ def generate_launch_description():
         world_arg,
         gazebo,
         spawn_entity,
-        diff_drive_spawner,
         joint_broad_spawner,
+        diff_drive_spawner,        
         xarm_spawner,
+        pan_tilt_spawner,
         ros_gz_bridge,
         ros_gz_image_bridge,
         rviz

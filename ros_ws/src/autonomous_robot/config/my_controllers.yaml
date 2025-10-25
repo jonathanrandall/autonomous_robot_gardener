@@ -1,7 +1,7 @@
 controller_manager:
   ros__parameters:
     update_rate: 30
-    # use_sim_time: true
+    use_sim_time: true
 
     diff_cont:
       type: diff_drive_controller/DiffDriveController
@@ -11,6 +11,9 @@ controller_manager:
 
     hiwonder_xarm_controller:
       type: joint_trajectory_controller/JointTrajectoryController
+
+    pan_tilt_controller:
+      type: forward_command_controller/ForwardCommandController
 
 
     joint_state_broadcaster:
@@ -129,3 +132,10 @@ hiwonder_xarm_controller:
     
     # # Trajectory execution parameters
     # allow_nonzero_velocity_at_trajectory_end: true
+
+pan_tilt_controller:
+  ros__parameters:
+    joints: ["pan_joint", "tilt_joint"]
+    interface_name: position
+
+
