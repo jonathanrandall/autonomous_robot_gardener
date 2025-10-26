@@ -5,6 +5,7 @@
     <gazebo>
         <plugin name="gz_ros2_control::GazeboSimROS2ControlPlugin" filename="libgz_ros2_control-system.so">
             <parameters>$(find pan_tilt_description)/config/pan_tilt_controllers.yaml</parameters>
+            <parameters>$(find pan_tilt_description)/config/gaz_ros2_ctl_use_sim.yaml</parameters>
         </plugin>
     </gazebo>
 

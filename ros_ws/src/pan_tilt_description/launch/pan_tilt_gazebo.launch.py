@@ -15,6 +15,7 @@ def generate_launch_description():
     # Package directories
     pkg_pan_tilt_description = get_package_share_directory('pan_tilt_description')
     pkg_ros_gz_sim = get_package_share_directory('ros_gz_sim')
+    package_name='autonomous_robot'
 
     # Paths
     urdf_file = os.path.join(pkg_pan_tilt_description, 'urdf', 'pan_tilt_standalone.xacro')
@@ -25,11 +26,20 @@ def generate_launch_description():
     robot_description = Command(['xacro ', urdf_file, ' sim_mode:=true'])
 
     # Declare launch arguments
+    default_world = os.path.join(
+        get_package_share_directory(package_name),
+        'worlds',
+        'empty.sdf'
+        )   
+    world = LaunchConfiguration('world')
+
     world_arg = DeclareLaunchArgument(
         'world',
-        default_value='',
-        description='World file to load in Gazebo'
-    )
+        default_value=default_world,
+        description='World to load'
+        )
+
+    
 
     use_sim_time_arg = DeclareLaunchArgument(
         'use_sim_time',
@@ -51,13 +61,18 @@ def generate_launch_description():
 
     # Gazebo
     gazebo = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([
-            os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py')
-        ]),
-        launch_arguments={
-            'gz_args': ['-r -v4 ', LaunchConfiguration('world')]
-        }.items()
-    )
+                PythonLaunchDescriptionSource([os.path.join(
+                    get_package_share_directory('ros_gz_sim'), 'launch', 'gz_sim.launch.py')]),
+                    launch_arguments={'gz_args': ['-r -v4 ', world], 'on_exit_shutdown': 'true'}.items()
+             )
+    # gazebo = IncludeLaunchDescription(
+    #     PythonLaunchDescriptionSource([
+    #         os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py')
+    #     ]),
+    #     launch_arguments={
+    #         'gz_args': ['-r -v4 ', LaunchConfiguration('world')]
+    #     }.items()
+    # )
 
     # Spawn entity
     spawn_entity = Node(
@@ -69,34 +84,26 @@ def generate_launch_description():
             '-z', '0.1',
             '-Y', '3.14159'
         ],
-        output='screen'
-    )
-
-    # Controller Manager
-    controller_manager = Node(
-        package='controller_manager',
-        executable='ros2_control_node',
-        parameters=[controller_config, {'use_sim_time': LaunchConfiguration('use_sim_time')}],
         output='screen',
-        remappings=[
-            ('/controller_manager/robot_description', '/robot_description'),
-        ]
+        parameters=[{'use_sim_time': LaunchConfiguration('use_sim_time')}]
     )
 
-    # Joint State Broadcaster Spawner
+    # Joint State Broadcaster Spawner (Gazebo plugin handles controller_manager)
     joint_state_broadcaster_spawner = Node(
         package='controller_manager',
         executable='spawner',
-        arguments=['joint_state_broadcaster'],
-        output='screen'
+        arguments=['joint_state_broadcaster', '--controller-manager', '/controller_manager'],
+        output='screen',
+        parameters=[{'use_sim_time': LaunchConfiguration('use_sim_time')}]
     )
 
     # Pan Tilt Controller Spawner
     pan_tilt_controller_spawner = Node(
         package='controller_manager',
         executable='spawner',
-        arguments=['pan_tilt_controller'],
-        output='screen'
+        arguments=['pan_tilt_controller', '--controller-manager', '/controller_manager'],
+        output='screen',
+        parameters=[{'use_sim_time': LaunchConfiguration('use_sim_time')}]
     )
 
     # Pan Tilt Teleop Node
@@ -105,7 +112,7 @@ def generate_launch_description():
         executable='pan_tilt_teleop',
         name='pan_tilt_teleop',
         output='screen',
-        parameters=[teleop_config]
+        parameters=[teleop_config, {'use_sim_time': LaunchConfiguration('use_sim_time')}]
     )
 
     # Joy Node for joystick input
@@ -113,7 +120,8 @@ def generate_launch_description():
         package='joy',
         executable='joy_node',
         name='joy_node',
-        output='screen'
+        output='screen',
+        parameters=[{'use_sim_time': LaunchConfiguration('use_sim_time')}]
     )
 
     return LaunchDescription([
@@ -122,7 +130,6 @@ def generate_launch_description():
         robot_state_publisher,
         gazebo,
         spawn_entity,
-        controller_manager,
         joint_state_broadcaster_spawner,
         pan_tilt_controller_spawner,
         pan_tilt_teleop,
