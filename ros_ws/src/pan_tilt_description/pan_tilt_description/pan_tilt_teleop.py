@@ -24,6 +24,8 @@ class PanTiltTeleop(Node):
                 ('pan_max', 1.57),
                 ('tilt_min', -0.5),
                 ('tilt_max', 0.5),
+                ('pan_speed', 0.05),
+                ('tilt_speed', 0.05),
                 ('publish_rate', 30.0)
             ]
         )
@@ -39,6 +41,8 @@ class PanTiltTeleop(Node):
         self.pan_max = self.get_parameter('pan_max').value
         self.tilt_min = self.get_parameter('tilt_min').value
         self.tilt_max = self.get_parameter('tilt_max').value
+        self.pan_speed = self.get_parameter('pan_speed').value
+        self.tilt_speed = self.get_parameter('tilt_speed').value
 
         publish_rate = self.get_parameter('publish_rate').value
         self.publish_period = 1.0 / publish_rate
@@ -65,15 +69,18 @@ class PanTiltTeleop(Node):
             if abs(pan_input) > self.deadzone:
                 if self.invert_pan:
                     pan_input = -pan_input
-                # map joystick [-1,1] to [min,max]
-                self.pan = ((pan_input + 1) / 2.0) * (self.pan_max - self.pan_min) + self.pan_min
+                # Increment pan angle based on joystick input
+                self.pan += pan_input * self.pan_speed
+                self.pan = max(self.pan_min, min(self.pan, self.pan_max))
 
         if self.enable_tilt:
             tilt_input = msg.axes[self.tilt_axis]
             if abs(tilt_input) > self.deadzone:
                 if self.invert_tilt:
                     tilt_input = -tilt_input
-                self.tilt = ((tilt_input + 1) / 2.0) * (self.tilt_max - self.tilt_min) + self.tilt_min
+                # Increment tilt angle based on joystick input
+                self.tilt += tilt_input * self.tilt_speed
+                self.tilt = max(self.tilt_min, min(self.tilt, self.tilt_max))
 
         msg_out = Float64MultiArray()
         msg_out.data = [self.pan, self.tilt]

@@ -66,7 +66,8 @@ def generate_launch_description():
         arguments=[
             '-topic', 'robot_description',
             '-name', 'pan_tilt_robot',
-            '-z', '0.1'
+            '-z', '0.1',
+            '-Y', '3.14159'
         ],
         output='screen'
     )
@@ -75,7 +76,7 @@ def generate_launch_description():
     controller_manager = Node(
         package='controller_manager',
         executable='ros2_control_node',
-        parameters=[controller_config],
+        parameters=[controller_config, {'use_sim_time': LaunchConfiguration('use_sim_time')}],
         output='screen',
         remappings=[
             ('/controller_manager/robot_description', '/robot_description'),
