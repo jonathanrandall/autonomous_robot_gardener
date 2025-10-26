@@ -1,0 +1,19 @@
+pan_tilt_teleop:
+  ros__parameters:
+    pan_axis: 0        # Joystick axis index for pan (example: left stick horizontal)
+    tilt_axis: 1       # Joystick axis index for tilt (example: left stick vertical)
+
+    enable_pan: true
+    enable_tilt: true
+
+    invert_pan: false
+    invert_tilt: false
+
+    deadzone: 0.1      # Minimum |axis| value before motion is accepted
+
+    pan_min: -1.57     # -90 degrees
+    pan_max: 1.57      # 90 degrees
+    tilt_min: -0.5     # - ~30 degrees
+    tilt_max: 0.5      # + ~30 degrees
+
+    publish_rate: 30.0 # Hz

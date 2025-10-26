@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- Gazebo ROS2 Control Plugin -->
+    <gazebo>
+        <plugin name="gz_ros2_control::GazeboSimROS2ControlPlugin" filename="libgz_ros2_control-system.so">
+            <parameters>$(find pan_tilt_description)/config/pan_tilt_controllers.yaml</parameters>
+        </plugin>
+    </gazebo>
+
+</robot>

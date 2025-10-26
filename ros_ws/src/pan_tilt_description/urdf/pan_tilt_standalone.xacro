@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="pan_tilt_robot">
+
+  <xacro:arg name="sim_mode" default="true"/>
+
+  <!-- Include pan_tilt mechanism -->
+  <xacro:include filename="$(find pan_tilt_description)/urdf/pan_tilt.xacro"/>
+
+  <!-- Include ros2_control configuration -->
+  <xacro:include filename="$(find pan_tilt_description)/urdf/ros2_control_pan_tilt.xacro"/>
+
+  <!-- Include Gazebo plugin -->
+  <xacro:include filename="$(find pan_tilt_description)/urdf/ros2_control_gazebo.xacro"/>
+
+  <!-- World link for Gazebo -->
+  <link name="world"/>
+
+  <!-- Base link to attach pan_tilt mechanism to -->
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 0.025" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.1 0.1 0.05"/>
+      </geometry>
+      <material name="blue">
+        <color rgba="0.2 0.2 0.8 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.025" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.1 0.1 0.05"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0.025" rpy="0 0 0"/>
+      <mass value="0.5"/>
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0"
+               iyy="0.001" iyz="0.0"
+               izz="0.001"/>
+    </inertial>
+  </link>
+
+  <!-- Fix base to world -->
+  <joint name="world_to_base" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Instantiate the pan-tilt mechanism -->
+  <xacro:pan_tilt_mechanism parent="base_link">
+    <origin xyz="0 0 0.05" rpy="0 0 0"/>
+  </xacro:pan_tilt_mechanism>
+
+</robot>
