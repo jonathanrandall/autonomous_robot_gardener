@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" >
-  <xacro:include filename="$(find autonomous_robot)/description/pan_tilt_xacros/pan_tilt.xacro"/>
+  <!-- <xacro:include filename="$(find autonomous_robot)/description/pan_tilt_xacros/pan_tilt.xacro"/> -->
+  <xacro:include filename="$(find pan_tilt_description)/urdf/pan_tilt.xacro"/>
 
 
 
