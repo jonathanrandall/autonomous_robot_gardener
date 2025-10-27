@@ -102,6 +102,13 @@ def generate_launch_description():
         arguments=["joint_broad"],
     )
 
+    cam_to_ee_node = Node(
+        package="autonomous_robot",
+        executable="camera_to_ee.py",
+        name="camera_to_ee_node",
+        parameters=[{'robot_namespace': ''}]
+    )
+
 
     bridge_params = os.path.join(get_package_share_directory(package_name),'config','gz_bridge.yaml')
     ros_gz_bridge = Node(
@@ -163,4 +170,5 @@ def generate_launch_description():
         ros_gz_bridge,
         ros_gz_image_bridge,
         rviz
+        # cam_to_ee_node
     ])

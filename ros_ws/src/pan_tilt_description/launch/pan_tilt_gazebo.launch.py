@@ -74,6 +74,9 @@ def generate_launch_description():
     #     }.items()
     # )
 
+    # ros2 topic pub /pan_tilt_controller/commands std_msgs/msg/Float64MultiArray \
+    # "{data: [0.5, 0.2]}"
+
     # Spawn entity
     spawn_entity = Node(
         package='ros_gz_sim',

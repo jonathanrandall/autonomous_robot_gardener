@@ -23,8 +23,27 @@ class CameraToEE(Node):
         # self.camera_frame = 'rgb_camera_optical_link'
         # self.ee_frame = 'xarm_base_link'
 
+        # Create publishers for camera and ee points
+        self.pub_cam = self.create_publisher(PointStamped, 'cam_to_ee/camera_point', 10)
+        self.pub_ee = self.create_publisher(PointStamped, 'cam_to_ee/ee_point', 10)
+
+        # Subscribe to distance camera topic
+        self.sub_dist_camera = self.create_subscription(
+            PointStamped,
+            'dist_camera',
+            self.dist_camera_callback,
+            10
+        )
+
+        # Store the latest point from dist_camera, or use default
+        self.latest_camera_point = None
+
         # Example: publish a test point in camera frame every second
         self.timer = self.create_timer(1.0, self.transform_point)
+
+    def dist_camera_callback(self, msg):
+        """Store the latest point from dist_camera topic"""
+        self.latest_camera_point = msg
 
     def transform_point(self):
         try:
@@ -35,16 +54,24 @@ class CameraToEE(Node):
                 rclpy.time.Time()
             )
 
-            # Example point: 1m straight ahead in camera frame
-            point_cam = PointStamped()
-            point_cam.header.frame_id = self.camera_frame
-            point_cam.header.stamp = self.get_clock().now().to_msg()
-            point_cam.point.x = 1.0
-            point_cam.point.y = 0.0
-            point_cam.point.z = 0.0
+            # Use point from dist_camera if available, otherwise use default
+            if self.latest_camera_point is not None:
+                point_cam = self.latest_camera_point
+            else:
+                # Default point: 1m straight ahead in camera frame
+                point_cam = PointStamped()
+                point_cam.header.frame_id = self.camera_frame
+                point_cam.header.stamp = self.get_clock().now().to_msg()
+                point_cam.point.x = 0.0
+                point_cam.point.y = 0.0
+                point_cam.point.z = 1.0
 
             # Transform it
             point_ee = tf2_geometry_msgs.do_transform_point(point_cam, trans)
+
+            # Publish both points
+            self.pub_cam.publish(point_cam)
+            self.pub_ee.publish(point_ee)
 
             self.get_logger().info(
                 f"Point in camera frame: {point_cam.point} "
