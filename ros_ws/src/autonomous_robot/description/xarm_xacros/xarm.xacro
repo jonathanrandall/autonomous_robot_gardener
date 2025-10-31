@@ -16,7 +16,7 @@
     <joint name="xarm_chassis" type="fixed">
         <parent link="chassis"/>
         <child link="xarm_base_link"/>
-        <origin xyz="${chassis_length1/4+0.02} ${chassis_width1/4+0.02} ${chassis_height1}" rpy="0.0 0.0 -${pi/2}"/>
+        <origin xyz="${chassis_length1/2-0.08} ${chassis_width1/2-0.08} ${chassis_height1}" rpy="0.0 0.0 -${pi/2}"/>
     </joint>
     
     <xacro:property name="sim_mode" value="true"/>

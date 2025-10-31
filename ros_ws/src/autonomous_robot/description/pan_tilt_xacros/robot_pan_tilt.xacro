@@ -7,7 +7,9 @@
 
   <!-- Instantiate the pan-tilt mechanism -->
   <xacro:pan_tilt_mechanism parent="chassis">
-    <origin xyz="${chassis_length/2} -${chassis_width/4} ${chassis_height+0.005}" rpy="0 0.0 0"/>
+    <origin xyz="${chassis_length/2-0.08+0.028} -${chassis_width/2-0.088+0.04} ${chassis_height}" rpy="0 0.0 0"/>
   </xacro:pan_tilt_mechanism>
+
+  <xacro:include filename="$(find pan_tilt_description)/urdf/ros2_control_pan_tilt.xacro"/>
 
 </robot>

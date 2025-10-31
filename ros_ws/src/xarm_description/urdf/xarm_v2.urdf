@@ -52,7 +52,7 @@
 
     <link name="xarm_6_link">
         <visual>
-            <origin rpy="0 0 0" xyz="0.0 0.0 0.0" />
+            <origin rpy="0 0 ${pi}" xyz="0.0 0.0 0.0" />
             <geometry>
                 <mesh filename="file://$(find xarm_description)/meshes/stls/link6.stl" scale="1.0 1.0 1.0" />
             </geometry>

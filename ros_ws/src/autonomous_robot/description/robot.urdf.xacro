@@ -14,7 +14,7 @@
     </xacro:unless>
     <xacro:include filename="lidar.xacro" />
     <xacro:include filename="pan_tilt_xacros/robot_pan_tilt.xacro" />
-    <xacro:include filename="$(find pan_tilt_description)/urdf/ros2_control_pan_tilt.xacro"/>
+    
     <!-- <xacro:include filename="pan_tilt_xacros/ros2_control_pan_tilt.xacro" /> -->
     <!-- <xacro:include filename="camera.xacro" /> -->
     <xacro:include filename="xarm_xacros/xarm.xacro" />
