@@ -66,7 +66,7 @@ class CameraToEE(Node):
                 point_cam.header.stamp = self.get_clock().now().to_msg()
                 point_cam.point.x = 0.0
                 point_cam.point.y = 0.0
-                point_cam.point.z = 1.0
+                point_cam.point.z = 0.2
 
             # Transform it
             point_ee = tf2_geometry_msgs.do_transform_point(point_cam, trans)
