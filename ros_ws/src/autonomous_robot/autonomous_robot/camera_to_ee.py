@@ -6,6 +6,8 @@ from tf2_ros import Buffer, TransformListener
 from geometry_msgs.msg import PointStamped
 import tf2_geometry_msgs  # gives do_transform_point
 
+# ros2 run autonomous_robot camera_to_ee.py
+
 class CameraToEE(Node):
     def __init__(self):
         super().__init__('camera_to_ee_node')
