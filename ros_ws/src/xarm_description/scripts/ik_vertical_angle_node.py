@@ -17,12 +17,17 @@ import pybullet as p
 import pybullet_data
 import os
 import sys
+import tempfile
+import re
+from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
+from std_msgs.msg import Header
+from builtin_interfaces.msg import Duration
 
 # Add parent directory to path to import base_robot_gui
 sys.path.append(os.path.dirname(__file__))
-from base_robot_gui import BaseRobotGUI
+from xarm_description.base_robot_gui import BaseRobotGUI
 
-
+# ros2 topic pub --once /cam_to_ee/ee_point geometry_msgs/msg/PointStamped "{header: {frame_id: 'camera_link'}, point: {x: 0.1, y: 0.1, z: 0.1}}"
 # ros2 run xarm_description ik_vertical_angle_node --ros-args -p vertical_angle:=0.785  # 45 degrees
 
 class IKVerticalAngleNode(BaseRobotGUI):
@@ -72,6 +77,40 @@ class IKVerticalAngleNode(BaseRobotGUI):
         self.get_logger().info(f"Subscribing to: cam_to_ee/ee_point")
         self.get_logger().info(f"Publishing to: {trajectory_topic}")
 
+    def preprocess_urdf(self, urdf_path):
+        """
+        Preprocess URDF file to replace $(find xarm_description) with actual path.
+        Creates a temporary file with the processed URDF.
+
+        Args:
+            urdf_path: Path to original URDF file
+
+        Returns:
+            Path to temporary processed URDF file
+        """
+        # Get the package path (parent of urdf directory)
+        package_path = os.path.dirname(os.path.dirname(urdf_path))
+
+        # Read original URDF
+        with open(urdf_path, 'r') as f:
+            urdf_content = f.read()
+
+        # Replace $(find xarm_description) with actual path
+        processed_content = re.sub(
+            r'\$\(find xarm_description\)',
+            package_path,
+            urdf_content
+        )
+
+        # Create temporary file
+        temp_fd, temp_path = tempfile.mkstemp(suffix='.urdf', text=True)
+        with os.fdopen(temp_fd, 'w') as f:
+            f.write(processed_content)
+
+        self.get_logger().info(f"Created temporary processed URDF: {temp_path}")
+        self.temp_urdf_path = temp_path  # Store for cleanup
+        return temp_path
+
     def init_pybullet_ik(self, urdf_path):
         """Initialize PyBullet physics engine for IK solving"""
         # Connect to PyBullet in DIRECT mode (no GUI)
@@ -86,8 +125,11 @@ class IKVerticalAngleNode(BaseRobotGUI):
             self.get_logger().error(f"URDF file not found: {urdf_path}")
             raise FileNotFoundError(f"URDF file not found: {urdf_path}")
 
+        # Preprocess URDF to replace $(find xarm_description) with actual path
+        urdf_processed = self.preprocess_urdf(urdf_path)
+
         self.robot = p.loadURDF(
-            urdf_path,
+            urdf_processed,
             basePosition=[0, 0, 0],
             useFixedBase=True,
             flags=p.URDF_USE_SELF_COLLISION
@@ -217,42 +259,39 @@ class IKVerticalAngleNode(BaseRobotGUI):
             [3] xarm_3_joint  (Wrist 1)
             [4] xarm_2_joint  (Wrist 2)
 
-        Controller order (from base_robot_gui.py):
+        Controller order:
             [0] xarm_1_joint
-            [1] xarm_1_joint_mirror
-            [2] xarm_2_joint
-            [3] xarm_3_joint
-            [4] xarm_4_joint
-            [5] xarm_5_joint
-            [6] xarm_6_joint
+            [1] xarm_2_joint
+            [2] xarm_3_joint
+            [3] xarm_4_joint
+            [4] xarm_5_joint
+            [5] xarm_6_joint
 
         Mapping:
-            controller[0] = 0.01  # xarm_1_joint (gripper, set to 0.01 as instructed)
-            controller[1] = 0.01  # xarm_1_joint_mirror (gripper mirror, set to 0.01)
-            controller[2] = pybullet[4]  # xarm_2_joint
-            controller[3] = pybullet[3]  # xarm_3_joint
-            controller[4] = pybullet[2]  # xarm_4_joint
-            controller[5] = pybullet[1]  # xarm_5_joint
-            controller[6] = pybullet[0]  # xarm_6_joint
+            controller[0] = 0.01  # xarm_1_joint (gripper, set to 0.01)
+            controller[1] = pybullet[4]  # xarm_2_joint
+            controller[2] = pybullet[3]  # xarm_3_joint
+            controller[3] = pybullet[2]  # xarm_4_joint
+            controller[4] = pybullet[1]  # xarm_5_joint
+            controller[5] = pybullet[0]  # xarm_6_joint
 
         Args:
             pybullet_positions: Array of 5 joint positions in PyBullet order
 
         Returns:
-            controller_positions: Array of 7 joint positions in controller order
+            controller_positions: Array of 6 joint positions in controller order
         """
-        controller_positions = [0.0] * 7
+        controller_positions = [0.0] * 6
 
-        # Set gripper joints to 0.01
+        # Set gripper joint to 0.01
         controller_positions[0] = 0.01  # xarm_1_joint
-        controller_positions[1] = 0.01  # xarm_1_joint_mirror
 
         # Map arm joints (reverse order)
-        controller_positions[2] = pybullet_positions[4]  # xarm_2_joint
-        controller_positions[3] = pybullet_positions[3]  # xarm_3_joint
-        controller_positions[4] = pybullet_positions[2]  # xarm_4_joint
-        controller_positions[5] = pybullet_positions[1]  # xarm_5_joint
-        controller_positions[6] = pybullet_positions[0]  # xarm_6_joint
+        controller_positions[1] = float(pybullet_positions[4])  # xarm_2_joint
+        controller_positions[2] = float(pybullet_positions[3])  # xarm_3_joint
+        controller_positions[3] = float(pybullet_positions[2])  # xarm_4_joint
+        controller_positions[4] = float(pybullet_positions[1])  # xarm_5_joint
+        controller_positions[5] = float(pybullet_positions[0])  # xarm_6_joint
 
         return controller_positions
 
@@ -298,11 +337,26 @@ class IKVerticalAngleNode(BaseRobotGUI):
             import traceback
             self.get_logger().error(traceback.format_exc())
 
+    
+    def send_all_joints(self, joint_angles, time_from_start_sec=2):
+        """Send all joint positions to the controller"""
+        
+        trajectory = JointTrajectory()
+        trajectory.joint_names = self.joint_names
+        trajectory.points = [JointTrajectoryPoint(positions=joint_angles, time_from_start=Duration(sec=time_from_start_sec))]
+        self.trajectory_pub.publish(trajectory)
+        return trajectory
+    
     def cleanup(self):
-        """Clean up PyBullet connection"""
+        """Clean up PyBullet connection and temporary files"""
         if hasattr(self, 'physics_client'):
             p.disconnect(self.physics_client)
             self.get_logger().info("PyBullet disconnected")
+
+        # Remove temporary URDF file
+        if hasattr(self, 'temp_urdf_path') and os.path.exists(self.temp_urdf_path):
+            os.remove(self.temp_urdf_path)
+            self.get_logger().info(f"Removed temporary URDF: {self.temp_urdf_path}")
 
 
 def main(args=None):

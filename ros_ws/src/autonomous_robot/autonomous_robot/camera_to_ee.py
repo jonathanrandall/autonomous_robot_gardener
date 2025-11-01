@@ -7,6 +7,7 @@ from geometry_msgs.msg import PointStamped
 import tf2_geometry_msgs  # gives do_transform_point
 
 # ros2 run autonomous_robot camera_to_ee.py
+# ros2 run xarm_description ik_vertical_angle_node.py
 
 class CameraToEE(Node):
     def __init__(self):

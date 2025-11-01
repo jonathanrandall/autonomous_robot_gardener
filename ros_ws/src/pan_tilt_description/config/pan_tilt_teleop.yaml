@@ -1,7 +1,7 @@
 pan_tilt_teleop:
   ros__parameters:
-    pan_axis: 0        # Joystick axis index for pan (example: left stick horizontal)
-    tilt_axis: 1       # Joystick axis index for tilt (example: left stick vertical)
+    pan_axis: 2        # Joystick axis index for pan (example: left stick horizontal)
+    tilt_axis: 3       # Joystick axis index for tilt (example: left stick vertical)
 
     enable_pan: true
     enable_tilt: true

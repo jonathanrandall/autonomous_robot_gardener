@@ -20,6 +20,7 @@ def generate_launch_description():
     # !!! MAKE SURE YOU SET THE PACKAGE NAME CORRECTLY !!!
 
     package_name='autonomous_robot' #<--- CHANGE ME
+    pan_tilt_package_name='pan_tilt_description'
 
     rsp = IncludeLaunchDescription(
                 PythonLaunchDescriptionSource([os.path.join(
@@ -30,6 +31,12 @@ def generate_launch_description():
     joystick = IncludeLaunchDescription(
                 PythonLaunchDescriptionSource([os.path.join(
                     get_package_share_directory(package_name),'launch','joystick.launch.py'
+                )]), launch_arguments={'use_sim_time': 'true'}.items()
+    )
+
+    camera_joystick = IncludeLaunchDescription(
+                PythonLaunchDescriptionSource([os.path.join(
+                    get_package_share_directory(pan_tilt_package_name),'launch','pan_tilt.joy.launch.py'
                 )]), launch_arguments={'use_sim_time': 'true'}.items()
     )
 
@@ -159,6 +166,7 @@ def generate_launch_description():
                               description='Open RViz.'),
         rsp,
         joystick,
+        camera_joystick,
         twist_mux,
         world_arg,
         gazebo,

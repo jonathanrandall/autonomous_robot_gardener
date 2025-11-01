@@ -161,7 +161,7 @@ class BaseRobotGUI(Node):
         for joint_name in self.joint_names:
             self.joint_limits[joint_name] = (-3.14, 3.14)
     
-    def send_all_joints(self, positions=None, time_from_start_sec=0):
+    def send_all_joints(self, positions=None, time_from_start_sec=2):
         """Send trajectory for all joints"""
         if positions is None:
             positions = self.current_positions

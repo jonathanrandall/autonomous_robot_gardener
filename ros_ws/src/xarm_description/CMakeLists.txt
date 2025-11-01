@@ -23,4 +23,9 @@ install(
   DESTINATION lib/${PROJECT_NAME}
 )
 
+install(
+  PROGRAMS scripts/ik_vertical_angle_node.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 ament_package()
