@@ -4,29 +4,20 @@ from launch.event_handlers import OnProcessExit
 from launch_ros.actions import Node
 from launch.substitutions import Command, FindExecutable, PathJoinSubstitution
 from launch_ros.substitutions import FindPackageShare
-import os
-from ament_index_python.packages import get_package_share_directory
 
 
 def generate_launch_description():
-    # Get URDF via xacro
+    # Get URDF via xacro (hardware-only, no geometric description)
     robot_description_content = Command(
         [
             PathJoinSubstitution([FindExecutable(name="xacro")]),
             " ",
             PathJoinSubstitution(
-                [FindPackageShare("pan_tilt_hardware"), "urdf", "pan_tilt_standalone_pi.xacro"]
+                [FindPackageShare("pan_tilt_hardware"), "urdf", "pan_tilt_hardware_only.xacro"]
             ),
         ]
     )
     robot_description = {"robot_description": robot_description_content}
-
-    node_robot_state_publisher = Node(
-        package='robot_state_publisher',
-        executable='robot_state_publisher',
-        output='screen',
-        parameters=[robot_description]
-    )
 
     # Controller manager config
     controller_config = PathJoinSubstitution(
@@ -64,7 +55,6 @@ def generate_launch_description():
     )
 
     nodes = [
-        node_robot_state_publisher,
         control_node,
         joint_state_broadcaster_spawner,
         delay_pan_tilt_controller_spawner_after_joint_state_broadcaster,

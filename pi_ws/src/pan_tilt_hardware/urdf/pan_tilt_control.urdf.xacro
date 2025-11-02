@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="pan_tilt">
+
+  <xacro:macro name="pan_tilt_system" params="
+    name:=pan_tilt_system
+    i2c_device:=/dev/i2c-1
+    i2c_address:=64
+    pan_channel:=7
+    tilt_channel:=3
+    pan_min_pulse:=150
+    pan_max_pulse:=600
+    tilt_min_pulse:=150
+    tilt_max_pulse:=600
+    pwm_frequency:=50">
+
+    <ros2_control name="${name}" type="system">
+      <hardware>
+        <plugin>pan_tilt_hardware/PanTiltHardware</plugin>
+        <param name="i2c_device">${i2c_device}</param>
+        <param name="i2c_address">${i2c_address}</param>
+        <param name="pan_channel">${pan_channel}</param>
+        <param name="tilt_channel">${tilt_channel}</param>
+        <param name="pan_min_pulse">${pan_min_pulse}</param>
+        <param name="pan_max_pulse">${pan_max_pulse}</param>
+        <param name="tilt_min_pulse">${tilt_min_pulse}</param>
+        <param name="tilt_max_pulse">${tilt_max_pulse}</param>
+        <param name="pwm_frequency">${pwm_frequency}</param>
+      </hardware>
+
+      <joint name="pan_joint">
+        <command_interface name="position">
+          <param name="min">-1.57</param>  <!-- -90 degrees -->
+          <param name="max">1.57</param>   <!-- +90 degrees -->
+        </command_interface>
+        <state_interface name="position">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+      </joint>
+
+      <joint name="tilt_joint">
+        <command_interface name="position">
+          <param name="min">-1.57</param>  <!-- -90 degrees -->
+          <param name="max">1.57</param>   <!-- +90 degrees -->
+        </command_interface>
+        <state_interface name="position">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+      </joint>
+
+    </ros2_control>
+
+  </xacro:macro>
+
+</robot>
