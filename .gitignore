@@ -12,6 +12,7 @@ install/
 *.lo
 *.o
 *.obj
+.claude
 
 # Precompiled Headers
 *.gch
