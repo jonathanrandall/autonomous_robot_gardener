@@ -91,7 +91,7 @@
         <origin xyz="0 0 ${servo_height/2}" rpy="1.57 0 0"/>
         <geometry>
           <!-- <mesh filename="file://$(find xarm_description)/meshes/stls/link5.stl" scale="1.0 1.0 1.0" /> -->
-          <mesh filename="file://$(find image_sync_processor)/meshes/stls/PAN-TILT_BASE_V1_fixed.stl" scale="0.001 0.001 0.001" />
+          <mesh filename="file://$(find pan_tilt_description)/urdf/meshes/stls/PAN-TILT_BASE_V1_fixed.stl" scale="0.001 0.001 0.001" />
           <!-- <box size="${servo_length} ${servo_width} ${servo_height}"/> -->
         </geometry>
         <material name="bracket_gray"/>
@@ -99,8 +99,8 @@
       <collision>
         <origin xyz="0 0 ${servo_height/2}" rpy="1.57 0 0"/>
         <geometry>
-          <mesh filename="file://$(find image_sync_processor)/meshes/stls/PAN-TILT_BASE_V1_fixed.stl" scale="0.001 0.001 0.001" />
-          <!-- <mesh filename="file://$(find image_sync_processor)/meshes/stls/PAN-TILT_BASE_V1_fixed.dae" scale="0.001 0.001 0.001" /> -->
+          <mesh filename="file://$(find pan_tilt_description)/urdf/meshes/stls/PAN-TILT_BASE_V1_fixed.stl" scale="0.001 0.001 0.001" />
+          <!-- <mesh filename="file://$(find pan_tilt_description)/urdf/meshes/stls/PAN-TILT_BASE_V1_fixed.dae" scale="0.001 0.001 0.001" /> -->
           <!-- <box size="0.06 0.06 0.06"/> -->
         </geometry>
       </collision>
@@ -124,7 +124,7 @@
         <origin xyz="0 0 ${servo_height/2}" rpy="0 0 0"/>
         <geometry>
           <!-- <mesh filename="file://$(find xarm_description)/meshes/stls/link5.stl" scale="1.0 1.0 1.0" /> -->
-          <!-- <mesh filename="file://$(find image_sync_processor)/meshes/stls/PAN-TILT_BASE_V1_fixed.stl" scale="0.001 0.001 0.001" /> -->
+          <!-- <mesh filename="file://$(find pan_tilt_description)/urdf/meshes/stls/PAN-TILT_BASE_V1_fixed.stl" scale="0.001 0.001 0.001" /> -->
           <box size="${servo_length} ${servo_width} ${servo_height}"/>
         </geometry>
         <material name="servo_black"/>
@@ -132,7 +132,7 @@
       <collision>
         <origin xyz="0 0 ${servo_height/2}" rpy="0 0 0"/>
         <geometry>
-          <!-- <mesh filename="file://$(find image_sync_processor)/meshes/stls/PAN-TILT_BASE_V1_fixed.dae" scale="0.001 0.001 0.001" /> -->
+          <!-- <mesh filename="file://$(find pan_tilt_description)/urdf/meshes/stls/PAN-TILT_BASE_V1_fixed.dae" scale="0.001 0.001 0.001" /> -->
           <box size="${servo_length} ${servo_width} ${servo_height}"/>
         </geometry>
       </collision>
@@ -156,7 +156,7 @@
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="file://$(find image_sync_processor)/meshes/stls/PAN-TILT_ROTOR_V2_fixed.stl" scale="0.001 0.001 0.001" />
+          <mesh filename="file://$(find pan_tilt_description)/urdf/meshes/stls/PAN-TILT_ROTOR_V2_fixed.stl" scale="0.001 0.001 0.001" />
           <!-- <box size="${mount_thickness} ${servo_width + 0.01} ${bracket_height/4}"/> -->
         </geometry>
         <material name="bracket_gray"/>
@@ -164,7 +164,7 @@
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="file://$(find image_sync_processor)/meshes/stls/PAN-TILT_ROTOR_V2_fixed.stl" scale="0.001 0.001 0.001" />
+          <mesh filename="file://$(find pan_tilt_description)/urdf/meshes/stls/PAN-TILT_ROTOR_V2_fixed.stl" scale="0.001 0.001 0.001" />
           <!-- <box size="${mount_thickness} ${servo_width + 0.01} ${bracket_height/4}"/> -->
         </geometry>
       </collision>
@@ -227,7 +227,7 @@
         <!-- <origin xyz="-${servo_length/4 + 0.01} 0 ${servo_length}" rpy="-1.57 0 1.57"/> -->
         <geometry>
           <!-- <box size="${servo_length + 0.02} ${servo_width + 0.01} ${mount_thickness}"/> -->
-          <mesh filename="file://$(find image_sync_processor)/meshes/stls/PAN-TILT_LEG_V2_fixed.stl" scale="0.001 0.001 0.001" />
+          <mesh filename="file://$(find pan_tilt_description)/urdf/meshes/stls/PAN-TILT_LEG_V2_fixed.stl" scale="0.001 0.001 0.001" />
         </geometry>
         <material name="bracket_gray"/>
       </visual>
@@ -236,7 +236,7 @@
         <!-- <origin xyz="-${servo_length/4 + 0.01} 0 ${servo_length}" rpy="-1.57 0 1.57"/> -->
         <geometry>
           <!-- <box size="${servo_length + 0.02} ${servo_width + 0.01} ${mount_thickness}"/> -->
-          <mesh filename="file://$(find image_sync_processor)/meshes/stls/PAN-TILT_LEG_V2_fixed.stl" scale="0.001 0.001 0.001" />
+          <mesh filename="file://$(find pan_tilt_description)/urdf/meshes/stls/PAN-TILT_LEG_V2_fixed.stl" scale="0.001 0.001 0.001" />
         </geometry>
       </collision>
       <inertial>
@@ -264,7 +264,7 @@
       <visual>
         <origin xyz="0 0 0" rpy="0 0 1.57"/>
         <geometry>
-          <mesh filename="file://$(find image_sync_processor)/meshes/stls/pi_stand_final_v2-Body_v2_fixed.stl" scale="0.001 0.001 0.001" />
+          <mesh filename="file://$(find pan_tilt_description)/urdf/meshes/stls/pi_stand_final_v2-Body_v2_fixed.stl" scale="0.001 0.001 0.001" />
           <!-- <box size="${camera_length} ${camera_width} ${camera_height}"/> -->
         </geometry>
         <material name="camera_blue"/>
@@ -273,7 +273,7 @@
         <origin xyz="0 0 0" rpy="0 0 1.57"/>
         <geometry>
           <!-- <box size="${camera_length} ${camera_width} ${camera_height}"/> -->
-          <mesh filename="file://$(find image_sync_processor)/meshes/stls/pi_stand_final_v2-Body_v2_fixed.stl" scale="0.001 0.001 0.001" />
+          <mesh filename="file://$(find pan_tilt_description)/urdf/meshes/stls/pi_stand_final_v2-Body_v2_fixed.stl" scale="0.001 0.001 0.001" />
         </geometry>
       </collision>
       <inertial>
