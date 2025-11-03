@@ -55,6 +55,9 @@ class TofPublisher(Node):
     def __init__(self):
         super().__init__('tof_publisher')
 
+        self.cam = None
+        self.timer = None
+
         # Create publisher for compressed image
         self.publisher_ = self.create_publisher(
             CompressedImage,
@@ -63,78 +66,115 @@ class TofPublisher(Node):
         )
 
         # Initialize Arducam ToF camera
-        self.cam = ac.ArducamCamera()
-        cam_idx = find_webcam_index("unicam")
+        try:
+            self.cam = ac.ArducamCamera()
+            cam_idx = find_webcam_index("unicam")
 
-        if cam_idx is None:
-            self.get_logger().error("Failed to find unicam device")
-            raise RuntimeError("Camera device not found")
+            if cam_idx is None:
+                self.get_logger().error("Failed to find unicam device")
+                raise RuntimeError("Camera device not found")
 
-        self.get_logger().info(f"Opening ToF camera on device index {cam_idx}")
+            self.get_logger().info(f"Opening ToF camera on device index {cam_idx}")
 
-        ret = self.cam.open(ac.Connection.CSI, cam_idx)
-        if ret != 0:
-            self.get_logger().error(f"Failed to open camera. Error code: {ret}")
-            raise RuntimeError(f"Camera open failed with error code {ret}")
+            ret = self.cam.open(ac.Connection.CSI, cam_idx)
+            if ret != 0:
+                self.get_logger().error(f"Failed to open camera. Error code: {ret}")
+                raise RuntimeError(f"Camera open failed with error code {ret}")
 
-        ret = self.cam.start(ac.FrameType.DEPTH)
-        if ret != 0:
-            self.get_logger().error(f"Failed to start camera. Error code: {ret}")
-            self.cam.close()
-            raise RuntimeError(f"Camera start failed with error code {ret}")
+            ret = self.cam.start(ac.FrameType.DEPTH)
+            if ret != 0:
+                self.get_logger().error(f"Failed to start camera. Error code: {ret}")
+                self.cam.close()
+                raise RuntimeError(f"Camera start failed with error code {ret}")
 
-        self.cam.setControl(ac.Control.RANGE, MAX_DISTANCE)
+            self.cam.setControl(ac.Control.RANGE, MAX_DISTANCE)
 
-        # Create timer to publish at ~30Hz
-        self.timer = self.create_timer(0.033, self.timer_callback)
+            # Create timer to publish at ~30Hz
+            self.timer = self.create_timer(0.033, self.timer_callback)
 
-        self.get_logger().info("ToF publisher initialized successfully")
+            self.get_logger().info("ToF publisher initialized successfully")
+        except Exception as e:
+            self.get_logger().error(f"Failed to initialize ToF camera: {e}")
+            if self.cam is not None:
+                try:
+                    self.cam.stop()
+                    self.cam.close()
+                except:
+                    pass
+            raise
 
     def timer_callback(self):
         """Capture and publish ToF image."""
-        frame = self.cam.requestFrame(200)
+        if self.cam is None:
+            return
 
-        if frame is not None and isinstance(frame, ac.DepthData):
-            depth_buf = frame.depth_data
-            amplitude_buf = frame.confidence_data
-            self.cam.releaseFrame(frame)
+        try:
+            frame = self.cam.requestFrame(200)
 
-            # Process frame to get result image
-            result_image = process_frame(depth_buf, amplitude_buf)
-            result_image = cv2.medianBlur(result_image, 5)
+            if frame is not None and isinstance(frame, ac.DepthData):
+                depth_buf = frame.depth_data
+                amplitude_buf = frame.confidence_data
+                self.cam.releaseFrame(frame)
 
-            # Compress image
-            _, buffer = cv2.imencode('.jpg', result_image, [cv2.IMWRITE_JPEG_QUALITY, 90])
+                # Process frame to get result image
+                result_image = process_frame(depth_buf, amplitude_buf)
+                result_image = cv2.medianBlur(result_image, 5)
 
-            # Create and publish compressed image message
-            msg = CompressedImage()
-            msg.header.stamp = self.get_clock().now().to_msg()
-            msg.header.frame_id = 'tof_camera'
-            msg.format = 'jpeg'
-            msg.data = buffer.tobytes()
+                # Compress image
+                _, buffer = cv2.imencode('.jpg', result_image, [cv2.IMWRITE_JPEG_QUALITY, 90])
 
-            self.publisher_.publish(msg)
+                # Create and publish compressed image message
+                msg = CompressedImage()
+                msg.header.stamp = self.get_clock().now().to_msg()
+                msg.header.frame_id = 'tof_camera'
+                msg.format = 'jpeg'
+                msg.data = buffer.tobytes()
+
+                self.publisher_.publish(msg)
+        except Exception as e:
+            self.get_logger().error(f"Error in timer callback: {e}")
 
     def destroy_node(self):
         """Clean up camera resources."""
-        self.get_logger().info("Shutting down ToF publisher")
-        self.cam.stop()
-        self.cam.close()
+        try:
+            self.get_logger().info("Shutting down ToF publisher")
+        except:
+            pass
+
+        if self.timer is not None:
+            self.timer.cancel()
+
+        if self.cam is not None:
+            try:
+                self.cam.stop()
+                self.cam.close()
+            except Exception as e:
+                print(f"Error closing camera: {e}")
+
         super().destroy_node()
 
 
 def main(args=None):
     rclpy.init(args=args)
+    tof_publisher = None
 
     try:
         tof_publisher = TofPublisher()
         rclpy.spin(tof_publisher)
+    except KeyboardInterrupt:
+        pass
     except Exception as e:
         print(f"Error: {e}")
     finally:
-        if rclpy.ok():
-            tof_publisher.destroy_node()
+        if tof_publisher is not None:
+            try:
+                tof_publisher.destroy_node()
+            except:
+                pass
+        try:
             rclpy.shutdown()
+        except:
+            pass
 
 
 if __name__ == '__main__':

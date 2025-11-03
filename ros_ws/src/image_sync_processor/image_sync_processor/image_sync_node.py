@@ -171,6 +171,44 @@ class ImageSyncProcessor(Node):
         segmentation_masks = [segmentation_masks[i] for i in sorted_index]    
         return lbls,stats,segmentation_masks
     
+    def get_shifted_image(self, clustered_image, cluster_centers): 
+        shifted_image = np.zeros_like(clustered_image, dtype=np.float32)
+
+        centers_flat = cluster_centers.flatten() if cluster_centers.ndim > 1 else cluster_centers
+        gray_level_ranges = [(float(c)-1, float(c)+1) for c in centers_flat]
+        yn, xn = clustered_image.shape
+
+        for i, (min_level, max_level) in enumerate(gray_level_ranges):
+            # Create mask for current cluster
+            mask = cv2.inRange(clustered_image, min_level, max_level)
+
+            # Compute pixel shift based on distance
+            distance = (255.001 - centers_flat[i]) * 200.0 / 255.0
+            if distance < 38.0:
+                slope, intercept = self.interp_params[0]
+            else:
+                slope, intercept = self.interp_params[1]
+            pixel_shift = slope * (1.0 / distance) + intercept
+            pixel_shift = int(round(pixel_shift))
+
+            # Apply negative shift to the clustered image for this cluster
+            temp = np.zeros_like(shifted_image)
+            temp[mask > 0] = centers_flat[i]
+            left_side = np.zeros((yn, pixel_shift), dtype=np.float32)
+            temp = np.concatenate((left_side, temp), axis=1)
+            temp = temp[:, :xn]
+            # y_coords, x_coords = np.where(mask > 0)
+
+            # for y, x in zip(y_coords, x_coords):
+            #     source_x = x - pixel_shift  # negative shift
+            #     if 0 <= source_x < clustered_image.shape[1]:
+            #         temp[y, x] = clustered_image[y, source_x]
+
+            # Update shifted_image only where mask is true
+            shifted_image[temp > 0] = temp[temp > 0]
+
+        return shifted_image
+    
     def sync_callback(self, webcam_msg, tof_msg):
         """
         Callback function that receives synchronized image pairs
@@ -230,6 +268,11 @@ class ImageSyncProcessor(Node):
             # Use k-means clustering
             clustered_image, cluster_centers, dists = self.do_kmeans(tof_filtered,n_samples=n_clusters)
 
+            #sort cluster centers
+            cluster_centers = np.sort(cluster_centers.flatten())
+
+            # shifted_image = self.get_shifted_image(clustered_image, cluster_centers)
+
             # self.get_logger().info(f'Cluster centers (sorted): {np.sort(cluster_centers.flatten())}')
             lbls,stats,segmentation_masks = self.get_segmentation(clustered_image, cluster_centers)
             dists = ((255.0-np.array(lbls))*200.0/255.001)
@@ -286,6 +329,18 @@ class ImageSyncProcessor(Node):
                     for box in boxes:
                         # Get bounding box coordinates
                         x1, y1, x2, y2 = map(int, box.xyxy[0].cpu().numpy())
+
+                        #take the middle of the box as the detection point
+                        x_center = int((x1 + x2) / 2)
+                        y_center = int((y1 + y2) / 2)
+
+                        if x2 - x1 > 11:
+                            x1 = x_center - 5
+                            x2 = x_center + 5
+                        if y2 - y1 > 5:
+                            y1 = y_center - 5
+                            y2 = y_center + 5
+
                         conf = float(box.conf[0])
                         cls = int(box.cls[0])
 
