@@ -39,7 +39,8 @@ class ImageSyncProcessor(Node):
         self.bridge = CvBridge()
 
         # Load YOLO model (will auto-download if not found)
-        self.yolo_model = YOLO('yolo11s.pt')
+        # self.yolo_model = YOLO('yolo11s.pt')
+        self.yolo_model = YOLO('yolo11n.pt')
 
         # Interpolation parameters: [slope, intercept] for pixel shift calculation
         # interp_params[0] for distance < 30, interp_params[1] for distance >= 30
