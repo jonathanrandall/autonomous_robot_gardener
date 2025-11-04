@@ -41,6 +41,7 @@ class ImageSyncProcessor(Node):
         # Load YOLO model (will auto-download if not found)
         # self.yolo_model = YOLO('yolo11s.pt')
         self.yolo_model = YOLO('yolo11n.pt')
+        self.yolo_model = YOLO('hand_raise.pt')
 
         # Interpolation parameters: [slope, intercept] for pixel shift calculation
         # interp_params[0] for distance < 30, interp_params[1] for distance >= 30
@@ -463,11 +464,11 @@ class ImageSyncProcessor(Node):
             # self.get_logger().info(f'shifted_image shape: {shifted_image.shape}, webcam_scaled shape: {webcam_scaled.shape}')
             #
             shifted_image_color = cv2.cvtColor(np.uint8(shifted_image), cv2.COLOR_GRAY2BGR)
-            overlay = cv2.addWeighted(
-                webcam_scaled, 0.3,
-                shifted_image_color, 0.7,
-                0
-            )
+            # overlay = cv2.addWeighted(
+            #     webcam_scaled, 0.3,
+            #     shifted_image_color, 0.7,
+            #     0
+            # )
 
             # overlay = cv2.addWeighted(
             #     webcam_scaled, 0.3,
