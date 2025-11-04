@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Read(//workspaces/jazzy_docker/autonomous_robot_gardener/ros_ws/**)"
+      "Read(//workspaces/jazzy_docker/autonomous_robot_gardener/ros_ws/**)",
+      "Bash(chmod:*)"
     ],
     "deny": [],
     "ask": []

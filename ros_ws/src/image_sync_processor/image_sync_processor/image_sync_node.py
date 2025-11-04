@@ -3,12 +3,14 @@
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import CompressedImage, Image
+from std_msgs.msg import String
 from cv_bridge import CvBridge
 import message_filters
 import cv2
 import numpy as np
 from sklearn.cluster import KMeans
 from ultralytics import YOLO
+import json
 
 hex_colors = [
     "#1f77b4",  # blue
@@ -79,9 +81,17 @@ class ImageSyncProcessor(Node):
             10
         )
 
+        # Publisher for detection labels and distances
+        self.detections_pub = self.create_publisher(
+            String,
+            '/detections/labels_distances',
+            10
+        )
+
         self.get_logger().info('Image Sync Processor node started')
         self.get_logger().info('Subscribing to /webcam/image/compressed and /tof/image/compressed')
         self.get_logger().info('Publishing overlay to /processed/overlay_image and /processed/overlay_image/compressed')
+        self.get_logger().info('Publishing detections to /detections/labels_distances')
 
 
     def do_kmeans(self, filtered_image, n_samples = 5):
@@ -323,6 +333,9 @@ class ImageSyncProcessor(Node):
                 # Run YOLOv11 detection on webcam_scaled
                 results = self.yolo_model(webcam_scaled, verbose=False)
 
+                # List to collect all detections for publishing
+                detections_list = []
+
                 # Process each detection
                 for result in results:
                     boxes = result.boxes
@@ -361,14 +374,33 @@ class ImageSyncProcessor(Node):
                         if best_idx >= 0:
                             distance = dists[best_idx]
 
+                            # Store detection data for publishing
+                            object_name = self.yolo_model.names[cls]
+                            detections_list.append({
+                                'class': object_name,
+                                'distance_cm': float(distance),
+                                'confidence': conf,
+                                'x_center': x_center,
+                                'y_center': y_center,
+                                'xn': xn,
+                                'yn': yn
+                            })
+
                             # Draw bounding box on img_out
                             cv2.rectangle(img_out, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
                             # Draw distance label
-                            label = f"{self.yolo_model.names[cls]} {distance:.1f}cm"
+                            label = f"{object_name} {distance:.1f}cm"
                             label_size, _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 2)
                             cv2.rectangle(img_out, (x1, y1 - label_size[1] - 10), (x1 + label_size[0], y1), (0, 255, 0), -1)
                             cv2.putText(img_out, label, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
+
+                # Publish detections as JSON string with no truncation
+                if detections_list:
+                    detections_msg = String()
+                    # Use separators to minimize whitespace for shorter message
+                    detections_msg.data = json.dumps(detections_list, separators=(',', ':'))
+                    self.detections_pub.publish(detections_msg)
 
                 overlay = img_out
 
