@@ -63,7 +63,7 @@ class BaseRobotGUI(Node):
                     
             except Exception as e:
                 self.get_logger().warn(f"Could not get joints from controller, using default: {e}")
-                self.joint_names = ['xarm_1_joint', 'xarm_1_joint_mirror', 'xarm_2_joint', 'xarm_3_joint', 'xarm_4_joint', 'xarm_5_joint', 'xarm_6_joint']
+                self.joint_names = ['xarm_1_joint', 'xarm_2_joint', 'xarm_3_joint', 'xarm_4_joint', 'xarm_5_joint', 'xarm_6_joint']
             
             # Get robot description and parse joint limits
             self.get_joint_limits_from_description()
@@ -81,7 +81,7 @@ class BaseRobotGUI(Node):
         except Exception as e:
             self.get_logger().error(f"Error getting joint information: {e}")
             # Fallback to default values
-            self.joint_names = ['xarm_1_joint', 'xarm_1_joint_mirror', 'xarm_2_joint', 'xarm_3_joint', 'xarm_4_joint', 'xarm_5_joint', 'xarm_6_joint']
+            self.joint_names = ['xarm_1_joint', 'xarm_2_joint', 'xarm_3_joint', 'xarm_4_joint', 'xarm_5_joint', 'xarm_6_joint']
             self.joint_limits = {name: (-3.14, 3.14) for name in self.joint_names}
             self.current_positions = [0.0] * len(self.joint_names)
     
@@ -161,7 +161,7 @@ class BaseRobotGUI(Node):
         for joint_name in self.joint_names:
             self.joint_limits[joint_name] = (-3.14, 3.14)
     
-    def send_all_joints(self, positions=None, time_from_start_sec=2):
+    def send_all_joints(self, positions=None, time_from_start_sec=1):
         """Send trajectory for all joints"""
         if positions is None:
             positions = self.current_positions

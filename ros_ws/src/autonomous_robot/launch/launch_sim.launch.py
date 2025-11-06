@@ -141,6 +141,18 @@ def generate_launch_description():
        condition=IfCondition(LaunchConfiguration('rviz'))
     )
 
+    ik_vertical_angle_config = os.path.join(
+        get_package_share_directory(package_name),
+        'config',
+        'ik_vertical_angle.yaml'
+        )
+    ik_vertical_angle_node = Node(
+        package='xarm_description',
+        executable='ik_vertical_angle_node.py',
+        name='ik_vertical_angle_node',
+        parameters=[ik_vertical_angle_config, {'use_sim_time': True}]
+    )
+
 
     # Code for delaying a node (I haven't tested how effective it is)
     # 
@@ -177,6 +189,7 @@ def generate_launch_description():
         pan_tilt_spawner,
         ros_gz_bridge,
         ros_gz_image_bridge,
-        rviz
-        # cam_to_ee_node
+        rviz,
+        cam_to_ee_node,
+        ik_vertical_angle_node
     ])

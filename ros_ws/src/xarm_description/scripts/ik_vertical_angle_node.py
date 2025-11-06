@@ -28,7 +28,7 @@ sys.path.append(os.path.dirname(__file__))
 from xarm_description.base_robot_gui import BaseRobotGUI
 
 # ros2 topic pub --once /cam_to_ee/ee_point geometry_msgs/msg/PointStamped "{header: {frame_id: 'camera_link'}, point: {x: 0.1, y: 0.1, z: 0.1}}"
-# ros2 run xarm_description ik_vertical_angle_node --ros-args -p vertical_angle:=0.785  # 45 degrees
+# ros2 run xarm_description ik_vertical_angle_node --ros-args -p vertical_angle:=-0.785  # 45 degrees
 
 class IKVerticalAngleNode(BaseRobotGUI):
     """
@@ -328,7 +328,7 @@ class IKVerticalAngleNode(BaseRobotGUI):
 
             # Update current positions and publish trajectory
             self.current_positions = controller_joint_positions
-            self.send_all_joints(controller_joint_positions, time_from_start_sec=2)
+            self.send_all_joints(controller_joint_positions, time_from_start_sec=1)
 
             self.get_logger().info("Published joint trajectory")
 
@@ -338,7 +338,7 @@ class IKVerticalAngleNode(BaseRobotGUI):
             self.get_logger().error(traceback.format_exc())
 
     
-    def send_all_joints(self, joint_angles, time_from_start_sec=2):
+    def send_all_joints(self, joint_angles, time_from_start_sec=1):
         """Send all joint positions to the controller"""
         
         trajectory = JointTrajectory()

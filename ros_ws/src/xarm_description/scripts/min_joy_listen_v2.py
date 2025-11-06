@@ -226,12 +226,12 @@ class JoyListener(BaseRobotGUI):
         
         try:
             # Use the base class method to send trajectory
-            trajectory = self.send_all_joints(self.current_joint_angles, time_from_start_sec=0)
+            trajectory = self.send_all_joints(self.current_joint_angles, time_from_start_sec=1)
             
         except Exception as e:
             self.get_logger().error(f"Error sending trajectory: {e}")
 
-    def send_all_joints(self, joint_angles, time_from_start_sec=2):
+    def send_all_joints(self, joint_angles, time_from_start_sec=1):
         """Send all joint positions to the controller"""
         
         trajectory = JointTrajectory()
