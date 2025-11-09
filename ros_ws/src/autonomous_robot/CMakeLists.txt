@@ -40,6 +40,7 @@ ament_python_install_package(${PROJECT_NAME})
 # Install Python executables
 install(PROGRAMS
   autonomous_robot/camera_to_ee.py
+  autonomous_robot/joint_state_merger.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
