@@ -22,11 +22,12 @@ class PanTiltTeleop(Node):
                 ('deadzone', 0.1),
                 ('pan_min', -1.57),
                 ('pan_max', 1.57),
-                ('tilt_min', -0.5),
-                ('tilt_max', 0.5),
+                ('tilt_min', -1.57),
+                ('tilt_max', 1.57),
                 ('pan_speed', 0.05),
                 ('tilt_speed', 0.05),
                 ('publish_rate', 30.0)
+                ('pan_tilt_controller_topic', '/pi/pan_tilt_controller/commands')
             ]
         )
 
@@ -43,6 +44,7 @@ class PanTiltTeleop(Node):
         self.tilt_max = self.get_parameter('tilt_max').value
         self.pan_speed = self.get_parameter('pan_speed').value
         self.tilt_speed = self.get_parameter('tilt_speed').value
+        self.pan_tilt_controller_topic = self.get_parameter('pan_tilt_controller_topic').value
 
         publish_rate = self.get_parameter('publish_rate').value
         self.publish_period = 1.0 / publish_rate
@@ -53,7 +55,7 @@ class PanTiltTeleop(Node):
 
         # Subscribers & publishers
         self.joy_sub = self.create_subscription(Joy, 'joy', self.joy_callback, 10)
-        self.cmd_pub = self.create_publisher(Float64MultiArray, '/pi/pan_tilt_controller/commands', 10)
+        self.cmd_pub = self.create_publisher(Float64MultiArray, self.pan_tilt_controller_topic, 10)
 
         # Timer for publishing
         self.last_pub_time = time.time()

@@ -31,7 +31,7 @@ def generate_launch_description():
 
    
 
-    # ros2 topic pub /pi/pan_tilt_controller/commands std_msgs/msg/Float64MultiArray  "{data: [0.0, 0.0]}"
+    # ros2 topic pub /pan_tilt_controller/commands std_msgs/msg/Float64MultiArray  "{data: [0.0, 0.15]}"
 
     
 
@@ -56,6 +56,7 @@ def generate_launch_description():
     return LaunchDescription([
         
         use_sim_time_arg,
+        joy_node,
         
         pan_tilt_teleop
     ])
