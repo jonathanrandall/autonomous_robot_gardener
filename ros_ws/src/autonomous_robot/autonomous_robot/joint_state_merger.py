@@ -35,7 +35,7 @@ class JointStateMerger(Node):
         # Subscribe to joint states from both sources
         self.sub_main = self.create_subscription(
             JointState,
-            '/joint_states',
+            '/arm/joint_states',
             self.main_joint_states_callback,
             qos_transient
         )
@@ -50,7 +50,7 @@ class JointStateMerger(Node):
         # Publisher for merged joint states
         self.pub_merged = self.create_publisher(
             JointState,
-            '/merged_joint_states',
+            '/joint_states',
             qos_publisher
         )
 

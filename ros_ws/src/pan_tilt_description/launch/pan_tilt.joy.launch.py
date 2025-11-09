@@ -31,8 +31,7 @@ def generate_launch_description():
 
    
 
-    # ros2 topic pub /pan_tilt_controller/commands std_msgs/msg/Float64MultiArray \
-    # "{data: [0.5, 0.2]}"
+    # ros2 topic pub /pi/pan_tilt_controller/commands std_msgs/msg/Float64MultiArray  "{data: [0.0, 0.0]}"
 
     
 

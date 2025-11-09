@@ -11,7 +11,7 @@ def generate_launch_description():
     # from ros2_control, avoiding QoS incompatibility warnings.
     joint_state_merger = Node(
         package='autonomous_robot',
-        executable='joint_state_merger',
+        executable='joint_state_merger.py',
         name='joint_state_merger',
         output='screen'
     )

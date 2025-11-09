@@ -53,7 +53,7 @@ class PanTiltTeleop(Node):
 
         # Subscribers & publishers
         self.joy_sub = self.create_subscription(Joy, 'joy', self.joy_callback, 10)
-        self.cmd_pub = self.create_publisher(Float64MultiArray, '/pan_tilt_controller/commands', 10)
+        self.cmd_pub = self.create_publisher(Float64MultiArray, '/pi/pan_tilt_controller/commands', 10)
 
         # Timer for publishing
         self.last_pub_time = time.time()

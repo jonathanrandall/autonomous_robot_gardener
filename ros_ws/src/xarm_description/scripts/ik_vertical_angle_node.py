@@ -37,7 +37,7 @@ class IKVerticalAngleNode(BaseRobotGUI):
     """
 
     def __init__(self, node_name='ik_vertical_angle_node',
-                 trajectory_topic='/hiwonder_xarm_controller/joint_trajectory',
+                 trajectory_topic='/arm/hiwonder_xarm_controller/joint_trajectory',
                  urdf_path=None,
                  vertical_angle=0.0):
         """

@@ -211,7 +211,7 @@
 
     <joint name="xarm_5_joint" type="revolute">
         <origin rpy="0 0 0" xyz="0 -0.0022 0.03195" />
-        <axis xyz="-1 0 0" />
+        <axis xyz="1 0 0" />
         <limit effort="1000" lower="-1.62" upper="1.62" velocity="1.0" />
         <!--safety_controller k_position="30" k_velocity="30" soft_lower_limit="-2.93215314335" soft_upper_limit="2.93215314335"/>
         <dynamics damping="1.0"/-->
@@ -222,7 +222,7 @@
     <joint name="xarm_4_joint" type="revolute">
         <!-- origin rpy="0 0 0" xyz="0 0.0 0.09765" /-->
         <origin rpy="0 0 0" xyz="0 0.0 0.097" />
-        <axis xyz="1 0 0" />
+        <axis xyz="-1 0 0" />
         <limit effort="1000" lower="-2.2" upper="2.2" velocity="1.0" />
         <!--safety_controller k_position="30" k_velocity="30" soft_lower_limit="-2.93215314335" soft_upper_limit="2.93215314335"/>
         <dynamics damping="1.0"/-->
@@ -234,7 +234,7 @@
     <joint name="xarm_3_joint" type="revolute">
         <origin rpy="0 0 0" xyz="0 0.0 0.093" />
         <!-- <origin rpy="0 0 0" xyz="0 0.0 0.030" /> -->
-        <axis xyz="-1 0 0" />
+        <axis xyz="1 0 0" />
         <limit effort="1000" lower="-2.05" upper="2.35" velocity="1.0" />
         <!--safety_controller k_position="30" k_velocity="30" soft_lower_limit="-2.93215314335" soft_upper_limit="2.93215314335"/>
         <dynamics damping="1.0"/-->
