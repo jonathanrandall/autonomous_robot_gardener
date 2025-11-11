@@ -83,6 +83,17 @@ class ImageSyncProcessor(Node):
             10
         )
 
+        self.overlay_combined_pub = self.create_publisher(
+            Image,
+            '/processed/overlay_combined_image',
+            10
+        )
+        self.overlay_combined_compressed_pub = self.create_publisher(
+            CompressedImage,
+            '/processed/overlay_combined_image/compressed',
+            10
+        )
+
         # Publisher for detection labels and distances
         self.detections_pub = self.create_publisher(
             String,
@@ -464,11 +475,11 @@ class ImageSyncProcessor(Node):
             # self.get_logger().info(f'shifted_image shape: {shifted_image.shape}, webcam_scaled shape: {webcam_scaled.shape}')
             #
             shifted_image_color = cv2.cvtColor(np.uint8(shifted_image), cv2.COLOR_GRAY2BGR)
-            # overlay = cv2.addWeighted(
-            #     webcam_scaled, 0.3,
-            #     shifted_image_color, 0.7,
-            #     0
-            # )
+            overlay_combined = cv2.addWeighted(
+                webcam_scaled, 0.3,
+                shifted_image_color, 0.7,
+                0
+            )
 
             # overlay = cv2.addWeighted(
             #     webcam_scaled, 0.3,
@@ -476,10 +487,14 @@ class ImageSyncProcessor(Node):
             #     0
             # )
 
+            overlay_combined_msg = self.bridge.cv2_to_imgmsg(overlay_combined, encoding='bgr8')
+            overlay_combined_msg.header = tof_msg.header  # Use ToF timestamp for output
+            self.overlay_combined_pub.publish(overlay_combined_msg)
+
             # Publish the overlay image (uncompressed)
             overlay_msg = self.bridge.cv2_to_imgmsg(overlay, encoding='bgr8')
             overlay_msg.header = tof_msg.header  # Use ToF timestamp for output
-            self.overlay_pub.publish(overlay_msg)
+            # self.overlay_pub.publish(overlay_msg)
 
             # Publish the overlay image (compressed)
             _, compressed_data = cv2.imencode('.jpg', overlay, [cv2.IMWRITE_JPEG_QUALITY, 90])
@@ -488,6 +503,13 @@ class ImageSyncProcessor(Node):
             overlay_compressed_msg.format = "jpeg"
             overlay_compressed_msg.data = compressed_data.tobytes()
             self.overlay_compressed_pub.publish(overlay_compressed_msg)
+
+            _, compressed_combined_data = cv2.imencode('.jpg', overlay_combined, [cv2.IMWRITE_JPEG_QUALITY, 90])
+            overlay_combined_compressed_msg = CompressedImage()
+            overlay_combined_compressed_msg.header = tof_msg.header
+            overlay_combined_compressed_msg.format = "jpeg"
+            overlay_combined_compressed_msg.data = compressed_combined_data.tobytes()
+            self.overlay_combined_compressed_pub.publish(overlay_combined_compressed_msg)
 
         except Exception as e:
             self.get_logger().error(f'Error processing images: {str(e)}')
