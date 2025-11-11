@@ -15,6 +15,7 @@
   <depend>pluginlib</depend>
   <depend>rclcpp</depend>
   <depend>rclcpp_lifecycle</depend>
+  <depend>pal_statistics</depend>
   <depend>libserial</depend>
   <depend>libserial-dev</depend>
 

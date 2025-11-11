@@ -11,6 +11,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   pluginlib
   rclcpp
   rclcpp_lifecycle
+  pal_statistics
 )
 
 # find dependencies
@@ -31,11 +32,14 @@ target_include_directories(diffdrive_arduino PUBLIC
 $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/hardware/include>
 $<INSTALL_INTERFACE:include/diffdrive_arduino>
 )
+
+
+
 ament_target_dependencies(
   diffdrive_arduino PUBLIC
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
-
+# include_directories(/opt/ros/jazzy/include/pal_statistics)
 target_link_libraries(diffdrive_arduino PUBLIC serial)
 
 # Causes the visibility macros to use dllexport rather than dllimport,
