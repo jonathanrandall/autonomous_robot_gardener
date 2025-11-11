@@ -1,0 +1,22 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 50  # Hz
+
+    pan_tilt_controller:
+      type: forward_command_controller/ForwardCommandController
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+
+pan_tilt_controller:
+  ros__parameters:
+    joints:
+      - pan_joint
+      - tilt_joint
+    interface_name: position
+
+
+joint_state_broadcaster:
+  ros__parameters:
+    {}

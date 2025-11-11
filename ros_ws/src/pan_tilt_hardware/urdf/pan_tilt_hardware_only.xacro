@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="pan_tilt">
+
+  <!-- Include ros2_control configuration -->
+  <xacro:include filename="pan_tilt_control.urdf.xacro"/>
+
+  <!-- Instantiate the ros2_control system -->
+  <xacro:pan_tilt_system />
+
+</robot>

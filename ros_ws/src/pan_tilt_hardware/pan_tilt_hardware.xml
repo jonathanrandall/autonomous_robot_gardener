@@ -1,0 +1,7 @@
+<library path="pan_tilt_hardware">
+  <class name="pan_tilt_hardware/PanTiltHardware" type="pan_tilt_hardware::PanTiltHardware" base_class_type="hardware_interface::SystemInterface">
+    <description>
+      ROS2 Control hardware interface for PCA9685-based pan-tilt camera mount
+    </description>
+  </class>
+</library>

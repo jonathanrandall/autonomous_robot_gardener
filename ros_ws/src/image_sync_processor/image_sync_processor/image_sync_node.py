@@ -40,8 +40,9 @@ class ImageSyncProcessor(Node):
 
         # Load YOLO model (will auto-download if not found)
         # self.yolo_model = YOLO('yolo11s.pt')
-        self.yolo_model = YOLO('yolo11n.pt')
-        self.yolo_model = YOLO('hand_raise.pt')
+        # self.yolo_model = YOLO('yolo11n.pt')
+        # self.yolo_model = YOLO('hand_raise.pt')
+        self.yolo_model = YOLO('yollo11n_leaf_v4.pt')
 
         # Interpolation parameters: [slope, intercept] for pixel shift calculation
         # interp_params[0] for distance < 30, interp_params[1] for distance >= 30
@@ -209,7 +210,7 @@ class ImageSyncProcessor(Node):
 
             # Compute pixel shift based on distance
             distance = (255.001 - centers_flat[i]) * 200.0 / 255.0
-            if distance < 138.0: #38.0:
+            if distance < 40.0: #38.0:
                 slope, intercept = self.interp_params[0]
             else:
                 slope, intercept = self.interp_params[1]
@@ -309,9 +310,9 @@ class ImageSyncProcessor(Node):
             shifts = np.zeros_like(dists, dtype=np.float32)
 
             slope_near, intercept_near = self.interp_params[0]
-            shifts[dists<138.0] = slope_near * (1.0 / dists[dists<138.0]) + intercept_near
+            shifts[dists<40.0] = slope_near * (1.0 / dists[dists<40.0]) + intercept_near
             slope_far, intercept_far = self.interp_params[1]
-            shifts[dists>=138.0] = slope_far * (1.0 / dists[dists>=138.0]) + intercept_far
+            shifts[dists>=40.0] = slope_far * (1.0 / dists[dists>=40.0]) + intercept_far
 
             # Check if we have segmentation masks (some clusters may be filtered out)
             if len(segmentation_masks) == 0:
