@@ -20,7 +20,7 @@
   <depend>gz_ros2_control</depend>
   <depend>xacro</depend>
 
-  <exec_depend>image_sync_processor</exec_depend>
+  <!-- <exec_depend>image_sync_processor</exec_depend> -->
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
