@@ -142,25 +142,27 @@ class ImageSyncProcessor(Node):
     def draw_instance_segmentation_masks(self, img, masks):
         ''' Draws coloured polygons masks over img '''
         filled = np.zeros_like(img)
-        # image_ret = img.copy()
+        image_ret = img.copy()
 
         for i, mask in enumerate(masks):
             if True or i==(len(masks) -1):
                 filled[mask] = COLOURS[i % len(COLOURS)]
         # Blend original and filled into a composite image
-        cv2.addWeighted(img, 0.75, filled, 0.45, 0.0, dst=img)
+        cv2.addWeighted(image_ret, 0.75, filled, 0.45, 0.0, dst=img)
+        return image_ret
     
     def draw_instance_segmentation_masks_gl(self, img, masks,dists):
         ''' Draws gray level polygons masks over img '''
-        if img.ndim == 3 and img.shape[2] == 3:  # RGB image
-            filled = np.zeros(img.shape[:2], dtype=img.dtype)  # grayscale version
-        else:
-            filled = np.zeros_like(img)  # already grayscale or single channel
+        # if img.ndim == 3 and img.shape[2] == 3:  # RGB image
+        #     filled = np.zeros(img.shape[:2], dtype=img.dtype)  # grayscale version
+        # else:
+        #     filled = np.zeros_like(img)  # already grayscale or single channel
         image_ret = img.copy()
+        filled = np.zeros_like(img)  # already grayscale or single channel
 
         for i, mask in enumerate(masks):
             if True or i==(len(masks) -1):
-                filled[mask] = dists[i] #COLOURS[i % len(COLOURS)]
+                filled[mask] = [dists[i]]*3 #COLOURS[i % len(COLOURS)]
         # Blend original and filled into a composite image
         cv2.addWeighted(image_ret, 0.75, filled, 0.45, 0.0, dst=img)
         return image_ret
@@ -493,7 +495,7 @@ class ImageSyncProcessor(Node):
             # log shifted image shape and webcam_scaled shape
             # self.get_logger().info(f'shifted_image shape: {shifted_image.shape}, webcam_scaled shape: {webcam_scaled.shape}')
             #
-            overlay_combined = self.draw_instance_segmentation_masks_gl(img_out, shifted_masks, dists)
+            overlay_combined = self.draw_instance_segmentation_masks_gl(img_out, shifted_masks,dists)
             # shifted_image_color = cv2.cvtColor(np.uint8(shifted_image), cv2.COLOR_GRAY2BGR)
             # overlay_combined = cv2.addWeighted(
             #     webcam_scaled, 0.3,
