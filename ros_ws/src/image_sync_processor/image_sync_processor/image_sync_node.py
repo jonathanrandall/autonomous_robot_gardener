@@ -42,7 +42,7 @@ class ImageSyncProcessor(Node):
         # self.yolo_model = YOLO('yolo11s.pt')
         # self.yolo_model = YOLO('yolo11n.pt')
         # self.yolo_model = YOLO('hand_raise.pt')
-        self.yolo_model = YOLO('yollo11n_leaf_v4.pt')
+        self.yolo_model = YOLO('yollo11s_leaf_v4.pt')
 
         # Interpolation parameters: [slope, intercept] for pixel shift calculation
         # interp_params[0] for distance < 30, interp_params[1] for distance >= 30
@@ -363,14 +363,16 @@ class ImageSyncProcessor(Node):
                         x_center = int((x1 + x2) / 2)
                         y_center = int((y1 + y2) / 2)
 
-                        if x2 - x1 > 11:
-                            x1 = x_center - 5
-                            x2 = x_center + 5
-                        if y2 - y1 > 5:
-                            y1 = y_center - 5
-                            y2 = y_center + 5
+                        if x2 - x1 > 111:
+                            x1 = x_center - 55
+                            x2 = x_center + 55
+                        if y2 - y1 > 111:
+                            y1 = y_center - 55
+                            y2 = y_center + 55
 
                         conf = float(box.conf[0])
+                        #round conf to 2 decimal places
+                        conf = round(conf, 2)
                         cls = int(box.cls[0])
 
                         # Create detection mask for overlap calculation
@@ -407,6 +409,7 @@ class ImageSyncProcessor(Node):
 
                             # Draw distance label
                             label = f"{object_name} {distance:.1f}cm"
+                            label = f"{conf} {distance:.1f}cm"
                             label_size, _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 2)
                             cv2.rectangle(img_out, (x1, y1 - label_size[1] - 10), (x1 + label_size[0], y1), (0, 255, 0), -1)
                             cv2.putText(img_out, label, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
