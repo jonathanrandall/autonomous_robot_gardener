@@ -7,10 +7,10 @@
     i2c_address:=64
     pan_channel:=7
     tilt_channel:=3
-    pan_min_pulse:=150
-    pan_max_pulse:=600
-    tilt_min_pulse:=150
-    tilt_max_pulse:=600
+    pan_min_pulse:=110
+    pan_max_pulse:=490
+    tilt_min_pulse:=110
+    tilt_max_pulse:=490
     pwm_frequency:=50">
 
     <ros2_control name="${name}" type="system">
