@@ -232,7 +232,7 @@
 
 
     <joint name="xarm_3_joint" type="revolute">
-        <origin rpy="0 0 0" xyz="0 0.0 0.093" />
+        <origin rpy="0 0 0" xyz="0 0.0 0.095" />
         <!-- <origin rpy="0 0 0" xyz="0 0.0 0.030" /> -->
         <axis xyz="1 0 0" />
         <limit effort="1000" lower="-2.05" upper="2.35" velocity="1.0" />
