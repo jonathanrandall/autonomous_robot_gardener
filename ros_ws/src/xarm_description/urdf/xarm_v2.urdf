@@ -265,6 +265,14 @@
         <child link="eef_2_finger_left_link"/>
     </joint>
 
+    <link name="finger_pinch_link"/>
+
+    <joint name="finger_pinch_joint" type="fixed">
+      <origin xyz="0 0 0.09" rpy="0 0 0"/>
+      <parent link="eef_base_link"/>
+      <child link="finger_pinch_link"/>
+    </joint>
+
         <!-- mirror here -->
 
         <!-- <xacro:if value="$(arg sim_mode)"> -->
