@@ -28,7 +28,7 @@ sys.path.append(os.path.dirname(__file__))
 from xarm_description.base_robot_gui import BaseRobotGUI
 
 # ros2 topic pub --once /cam_to_ee/ee_point geometry_msgs/msg/PointStamped "{header: {frame_id: 'camera_link'}, point: {x: 0.1, y: 0.1, z: 0.1}}"
-# ros2 run xarm_description ik_vertical_angle_node --ros-args -p vertical_angle:=-0.785  # 45 degrees
+# ros2 run xarm_description ik_vertical_angle_node.py --ros-args -p vertical_angle:=-0.785  # 45 degrees
 
 class IKVerticalAngleNode(BaseRobotGUI):
     """

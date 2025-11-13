@@ -26,7 +26,7 @@ class PanTiltTeleop(Node):
                 ('tilt_max', 1.57),
                 ('pan_speed', 0.05),
                 ('tilt_speed', 0.05),
-                ('publish_rate', 30.0)
+                ('publish_rate', 30.0),
                 ('pan_tilt_controller_topic', '/pi/pan_tilt_controller/commands')
             ]
         )
