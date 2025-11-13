@@ -195,8 +195,10 @@ namespace xarm_hardware
     double max_hw = 1000.0;
     double min_ros = -2.35619; // -0.75 * M_PI;
     double max_ros = 2.35619;  // 0.75 * M_PI;
+    const double scale_factor = 0.9090909091; // 1/1.1 to reverse the scaling in write
+    ticks = std::max(min_hw, std::min(max_hw, (double)ticks ));
 
-    return min_ros + ((ticks - min_hw) / (max_hw - min_hw)) * (max_ros - min_ros);
+    return (min_ros + ((ticks - min_hw) / (max_hw - min_hw)) * (max_ros - min_ros))*scale_factor;
   }
 
   double radians_to_gripper(int radians)
@@ -340,11 +342,12 @@ namespace xarm_hardware
     const double min_rad = -2.35619;
     const double max_rad = 2.35619;
     const double out_max = 1000.0;
+    const double scale_factor = 1.1;
 
     for (size_t i = 0; i < positions.size(); ++i)
     {
       // Scale from radians to 0-1000 range
-      double scaled = (positions[i] - min_rad) / (max_rad - min_rad) * out_max;
+      double scaled = (scale_factor*positions[i] - min_rad) / (max_rad - min_rad) * out_max;
       // Clip to valid range
       scaled = std::max(0.0, std::min(out_max, scaled));
       transformed[i] = scaled;
