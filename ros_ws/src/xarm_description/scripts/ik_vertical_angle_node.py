@@ -171,7 +171,7 @@ class IKVerticalAngleNode(BaseRobotGUI):
         ]
 
         # Find end effector link
-        self.ee_link_name = 'eef_base_link'
+        self.ee_link_name ='finger_pinch_link'# 'eef_base_link'
         self.ee_link_index = None
 
         # Try to find end effector link
