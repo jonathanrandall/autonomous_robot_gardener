@@ -65,8 +65,8 @@ class CameraToEE(Node):
                 point_cam = PointStamped()
                 point_cam.header.frame_id = self.camera_frame
                 point_cam.header.stamp = self.get_clock().now().to_msg()
-                point_cam.point.x = -0.065
-                point_cam.point.y = -0.065
+                point_cam.point.x = -0.0
+                point_cam.point.y = -0.0
                 point_cam.point.z = 0.2
 
             # Transform it
