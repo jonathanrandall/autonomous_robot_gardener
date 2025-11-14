@@ -3,17 +3,14 @@
 
   <xacro:arg name="sim_mode" default="false"/>
 
-  <!-- Include pan_tilt mechanism -->
-  <!-- <xacro:include filename="$(find pan_tilt_description)/urdf/pan_tilt.xacro"/> -->
-
-  <!-- Include ros2_control configuration -->
-  <!-- <xacro:include filename="$(find pan_tilt_description)/urdf/ros2_control_pan_tilt.xacro"/> -->
-
-  <!-- Include pan_tilt mechanism -->
-  <xacro:include filename="pan_tilt_pi.urdf.xacro"/>
+  <!-- Include pan_tilt mechanism from pan_tilt_description (SINGLE SOURCE OF TRUTH) -->
+  <xacro:include filename="$(find pan_tilt_description)/urdf/pan_tilt.xacro"/>
 
   <!-- Include ros2_control configuration -->
   <xacro:include filename="pan_tilt_control.urdf.xacro"/>
+
+  <!-- OLD: Include pan_tilt mechanism (DISABLED - causes mismatch with main robot) -->
+  <!-- <xacro:include filename="pan_tilt_pi.urdf.xacro"/> -->
 
   <!-- Include Gazebo plugin -->
   <!-- <xacro:include filename="$(find pan_tilt_description)/urdf/ros2_control_gazebo.xacro"/> -->
