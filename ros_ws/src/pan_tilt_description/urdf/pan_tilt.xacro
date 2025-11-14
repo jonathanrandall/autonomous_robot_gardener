@@ -251,7 +251,7 @@
 
     <joint name="tilt_joint" type="revolute">
       <!-- <origin xyz="0 0 0" rpy="0 0 0"/> -->
-      <origin xyz="${servo_length/2} 0.01 ${servo_height/10}" rpy="-1.4 0 1.57"/>
+      <origin xyz="${servo_length/2-0.01} 0.005 ${servo_height/10}" rpy="-1.4 0 1.57"/>
       <parent link="tilt_servo_link"/>
       <child link="tilt_link"/>
       <axis xyz="1 0 0"/>
