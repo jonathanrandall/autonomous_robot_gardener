@@ -47,6 +47,61 @@ ros2 launch xarm_description launch_sim.xarm.launch.py
 
 ---
 
+## Running the Real Robot
+
+### On the Mini PC
+
+Launch the robot:
+```bash
+ros2 launch autonomous_robot mini_pc.launch.py
+```
+
+### On the Raspberry Pi
+
+Launch the pan-tilt control:
+```bash
+ros2 launch autonomous_robot pi.launch.py
+```
+
+Launch the camera publisher:
+```bash
+ros2 launch autonomous_robot camera_publisher.launch.py
+```
+
+### Back on the Mini PC
+
+Launch the joint states merger:
+```bash
+ros2 launch autonomous_robot merge_joint_states.launch.py
+```
+
+Launch the pan-tilt joystick control:
+```bash
+ros2 launch pan_tilt_description pan_tilt.joy.launch.py
+```
+
+Run the camera to end-effector node:
+```bash
+ros2 run autonomous_robot camera_to_ee.py
+```
+
+Run the IK vertical angle node (replace `angle` with your desired angle value):
+```bash
+ros2 run xarm_description ik_vertical_angle_node.py --ros-args -p vertical_angle:=angle
+```
+
+Launch the image sync processor:
+```bash
+ros2 launch autonomous_robot image_sync_processor.launch.py
+```
+
+Launch the leaf tracker:
+```bash
+ros2 launch autonomous_robot leaf_tracker.launch.py
+```
+
+---
+
 ## Hardware Code Notes
 I'm using the hiwonder xarm with the esp32 board. The micropython code is in the [xarm_software/micorpython_xarm_control](https://github.com/jonathanrandall/autonomous_robot_gardener/tree/main/xarm_software/micropython_xarm_control) directory. I used PyMakr to load it onto the esp32 board.
 

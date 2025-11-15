@@ -126,6 +126,7 @@ def generate_launch_description():
         executable="parameter_bridge",
         arguments=[
             '--ros-args',
+            '-p', 'use_sim_time:=true',
             '-p',
             f'config_file:={bridge_params}',
         ]
@@ -134,13 +135,17 @@ def generate_launch_description():
     ros_gz_image_bridge = Node(
         package="ros_gz_image",
         executable="image_bridge",
-        arguments=["/camera/image_raw"]
+        arguments=[
+            "/camera/image_raw",
+            '--ros-args',
+            '-p', 'use_sim_time:=true']
     )
 
     rviz = Node(
        package='rviz2',
        executable='rviz2',
        arguments=['-d', rviz_file],
+       parameters=[{'use_sim_time': True}],
        condition=IfCondition(LaunchConfiguration('rviz'))
     )
 
@@ -193,6 +198,6 @@ def generate_launch_description():
         ros_gz_bridge,
         ros_gz_image_bridge,
         rviz,
-        cam_to_ee_node,
-        ik_vertical_angle_node
+        # cam_to_ee_node,
+        # ik_vertical_angle_node
     ])
