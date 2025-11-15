@@ -109,26 +109,84 @@ The esp32 code for the motor control is in the [esp32_controls_diffbot_serial](h
 
 ---
 
-# Repo Structure overview
+# Repo Structure Overview
 
-### docs directory:
-This directory contains:
-1. __dot_vscode__, which has the configuration for my vscode mostly needed for include paths
-2. __photos__, pictures for the repo
-3. __robot_docker_files__, these are the files for my docker container build and configuration. Its recommended to use a docker container because if you upgrade your version of ROS, you don't need to upgrade your operating system. And if you pollute your environment by installing multiple versions of the same package, then you can just rebuild your container
-4. __trouble_shooting_and_tips__, trouble shooting with the gamepad (need to add input group to get ros to see the gamepad), ros bridge messages summary frrom gazebo, ros2 cli cheat sheet,esp32_mapping.txt which shows how to map an esp32 to a static port, twist_mux.yaml which is my updated file from articubot one, xarm_measurements.jpg is the mesurements for the xarm which can be used for robot kinematics if needed
-5. __chassis_bom.md__, chassis bill of materials
-6. __electronics_bom.md__, electronics bill of materials
+This repository is organized into several key directories, each serving a specific purpose in the development and operation of the autonomous robot gardener.
 
-### esp32_controls_diffbot_serial directory
-This directory contains the code for the esp32 that drives the motors. This code interfaces with the hardware interface and uses a pid controller to set the speed of the wheels as instructed by the commands from the diff drive controller.
+## docs/
 
-### ros_ws/src directory
-This directory contains four ros2 packages that I have developed for this robot
-1. __autonomous_robot__: this is the package for the robot chassis, and also connects the robot arm to the chassis. This is updated from Josh Newans articubot one project
-2. __diffdrive_arduino__: this is the diff drive hardware interface for the esp32 and motor controllers. Its an updated version of Josh Newans diffdrive_arduino package. Josh uses an arduino and I didn't want to change the name incase I broke something. This is adapted for a four wheel drive robot.
-3. __xarm_description__: this is the description package for the xarm and contains the urdf as well as launch files to view the urdf in RViZ and simulation.
-4. __xarm_hardware__: ros2 control hardware interface for the hiwonder xarm with the esp32 board. 
+The documentation and configuration directory containing development tools, reference materials, and project documentation:
+
+- **dot_vscode/**: VSCode workspace configuration files, primarily containing C++ include paths and build settings for proper IntelliSense support when working with ROS2 packages.
+
+- **photos/**: Visual documentation and images used throughout the repository, including build photos and system diagrams.
+
+- **robot_docker_files/**: Docker container configuration and build files for the development and runtime environment. Using Docker is highly recommended as it:
+  - Allows ROS version upgrades without OS upgrades
+  - Provides environment isolation preventing dependency conflicts
+  - Enables easy environment reconstruction if issues arise
+  - Ensures consistent development environments across different machines
+
+- **trouble_shooting_and_tips/**: Collection of troubleshooting guides and useful resources including:
+  - Gamepad setup instructions (adding user to input group for ROS2 joystick access)
+  - ROS bridge message summaries from Gazebo
+  - ROS2 CLI command cheat sheet
+  - `esp32_mapping.txt`: Guide for mapping ESP32 devices to static USB ports using udev rules
+  - `twist_mux.yaml`: Updated velocity multiplexer configuration adapted from Articubot One
+  - `xarm_measurements.jpg`: Physical measurements of the XArm for kinematics calculations
+
+- **chassis_bom.md**: Complete bill of materials for the mechanical chassis components including frame, wheels, motors, and mounting hardware.
+
+- **electronics_bom.md**: Bill of materials for all electronic components including microcontrollers, motor drivers, sensors, and wiring.
+
+## esp32_controls_diffbot_serial/
+
+Contains the embedded firmware for the ESP32 microcontroller that interfaces with the motor controllers. This code:
+- Receives velocity commands from the ROS2 diff_drive controller via serial communication
+- Implements PID control loops for accurate wheel speed control
+- Provides encoder feedback for odometry calculations
+- Manages four-wheel drive motor control with individual wheel control
+- Handles low-level motor driver communication and safety features
+
+## ros_ws/src/
+
+The ROS2 workspace source directory containing custom packages developed for this robot:
+
+### 1. autonomous_robot
+The main integration package that brings together all robot components. Features include:
+- **Robot description**: Combined URDF/Xacro files integrating the mobile base with the XArm manipulator
+- **Launch files**: System startup scripts for both simulation and real hardware
+- **Configuration files**: ROS2 Control configurations, navigation parameters, and controller settings
+- **Chassis integration**: Mobile base controller configuration and sensor integration
+- **Camera processing nodes**: Image processing and computer vision for plant detection
+- Built upon Josh Newans' Articubot One project with extensive modifications for arm integration and autonomous gardening capabilities
+
+### 2. diffdrive_arduino
+Hardware interface package providing ROS2 Control integration for the differential drive mobile base:
+- **Serial communication**: Interfaces with ESP32 motor controller via serial protocol
+- **Odometry publishing**: Calculates and publishes robot position and velocity based on encoder data
+- **Command handling**: Translates ROS2 velocity commands to motor controller instructions
+- **Four-wheel drive support**: Adapted from the original two-wheel Articubot One design to support four independently controlled wheels
+- Named "diffdrive_arduino" to maintain compatibility with the original Josh Newans package structure
+
+### 3. xarm_description
+Description and visualization package for the HiWonder XArm robotic manipulator:
+- **URDF/Xacro models**: Complete robot description with accurate link geometries, joint limits, and inertial properties
+- **Mesh files**: 3D visual and collision meshes for simulation and visualization
+- **Launch files**:
+  - RViz visualization configurations
+  - Gazebo simulation launch files
+  - Joystick teleoperation for manual arm control
+- **Inverse kinematics nodes**: Custom IK solvers for positioning the end-effector
+- **Controllers**: Joint trajectory controller and position controller configurations
+
+### 4. xarm_hardware
+ROS2 Control hardware interface for the HiWonder XArm with ESP32 control board:
+- **Hardware interface**: Implements ROS2 Control's hardware interface for real-time joint control
+- **Serial communication**: Communicates with the ESP32 running MicroPython firmware on the XArm
+- **Joint state publishing**: Reads and publishes current joint positions from the arm
+- **Command execution**: Sends joint position commands to the servos
+- **Safety features**: Joint limit enforcement and error handling 
 
 
 # Bill of Materials (BOM)
