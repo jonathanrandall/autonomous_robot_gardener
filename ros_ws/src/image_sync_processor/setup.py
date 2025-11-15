@@ -17,7 +17,7 @@ setup(
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='ubuntu',
-    maintainer_email='jonnyrandall@live.com.au',
+    maintainer_email='me@me.com',
     description='ROS2 package for synchronizing and processing webcam and ToF compressed images',
     license='MIT',
     tests_require=['pytest'],

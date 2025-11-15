@@ -4,7 +4,7 @@
   <name>image_sync_processor</name>
   <version>0.0.0</version>
   <description>ROS2 package for synchronizing and processing webcam and ToF compressed images</description>
-  <maintainer email="jonnyrandall@live.com.au">ubuntu</maintainer>
+  <maintainer email="me@me.com">ubuntu</maintainer>
   <license>MIT</license>
 
   <depend>rclpy</depend>

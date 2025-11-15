@@ -19,7 +19,7 @@ setup(
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='ros',
-    maintainer_email='jonnyrandall@live.com.au',
+    maintainer_email='me@me.com',
     description='TODO: Package description',
     license='TODO: License declaration',
     extras_require={
