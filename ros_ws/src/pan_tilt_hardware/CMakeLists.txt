@@ -11,6 +11,7 @@ find_package(hardware_interface REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
+find_package(pal_statistics REQUIRED)
 
 ## COMPILE
 add_library(
@@ -31,6 +32,7 @@ ament_target_dependencies(
   pluginlib
   rclcpp
   rclcpp_lifecycle
+  pal_statistics
 )
 
 # Export hardware plugins
