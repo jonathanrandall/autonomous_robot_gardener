@@ -397,47 +397,40 @@ class ImageSyncProcessor(Node):
                         det_mask = np.zeros((webcam_scaled.shape[0], webcam_scaled.shape[1]), dtype=bool)
                         det_mask[y1:y2, x1:x2] = True
 
-                        # Calculate distance from shifted_image pixels in the detection box
-                        box_pixels = shifted_image[y1:y2, x1:x2]
+                        # Find shifted_mask with biggest overlap
+                        max_overlap = 0
+                        best_idx = -1
+                        for idx, shifted_mask in enumerate(shifted_masks):
+                            overlap = np.sum(det_mask & shifted_mask)
+                            if overlap > max_overlap:
+                                max_overlap = overlap
+                                best_idx = idx
 
-                        # Calculate distance: (255.0 - shifted_image) * 200 / 255
-                        distance_map = (255.0 - box_pixels) * 200.0 / 255.0
+                        # Get distance from dists array
+                        if best_idx >= 0:
+                            distance = dists[best_idx]
 
-                        # Filter pixels with distance < 60
-                        close_pixels = distance_map[distance_map < 60.0]
+                            # Store detection data for publishing
+                            object_name = self.yolo_model.names[cls]
+                            detections_list.append({
+                                'class': object_name,
+                                'distance_cm': float(distance),
+                                'confidence': conf,
+                                'x_center': x_center,
+                                'y_center': y_center,
+                                'xn': xn,
+                                'yn': yn
+                            })
 
-                        # Calculate total pixels in box
-                        total_pixels = box_pixels.size
+                            # Draw bounding box on img_out
+                            cv2.rectangle(img_out, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
-                        # Check if more than 30% of pixels have distance < 60
-                        if close_pixels.size > 0.3 * total_pixels:
-                            # Average distance of pixels < 60
-                            distance = np.mean(close_pixels)
-                        else:
-                            # Set distance to 100 if less than 30% are close
-                            distance = 100.0
-
-                        # Store detection data for publishing
-                        object_name = self.yolo_model.names[cls]
-                        detections_list.append({
-                            'class': object_name,
-                            'distance_cm': float(distance),
-                            'confidence': conf,
-                            'x_center': x_center,
-                            'y_center': y_center,
-                            'xn': xn,
-                            'yn': yn
-                        })
-
-                        # Draw bounding box on img_out
-                        cv2.rectangle(img_out, (x1, y1), (x2, y2), (0, 255, 0), 2)
-
-                        # Draw distance label
-                        label = f"{object_name} {distance:.1f}cm"
-                        label = f"{conf} {distance:.1f}cm"
-                        label_size, _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 2)
-                        cv2.rectangle(img_out, (x1, y1 - label_size[1] - 10), (x1 + label_size[0], y1), (0, 255, 0), -1)
-                        cv2.putText(img_out, label, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
+                            # Draw distance label
+                            label = f"{object_name} {distance:.1f}cm"
+                            label = f"{conf} {distance:.1f}cm"
+                            label_size, _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 2)
+                            cv2.rectangle(img_out, (x1, y1 - label_size[1] - 10), (x1 + label_size[0], y1), (0, 255, 0), -1)
+                            cv2.putText(img_out, label, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
 
                 # Publish detections as JSON string with no truncation
                 if detections_list:
