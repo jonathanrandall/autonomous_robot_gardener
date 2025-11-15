@@ -2,14 +2,13 @@ from launch import LaunchDescription
 from launch.actions import RegisterEventHandler
 from launch.event_handlers import OnProcessExit
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
 from launch.substitutions import Command, FindExecutable, PathJoinSubstitution
 from launch_ros.substitutions import FindPackageShare
 import os
 from ament_index_python.packages import get_package_share_directory
 import yaml
 from tempfile import NamedTemporaryFile
-
-from ament_index_python.packages import get_package_share_directory
 
 def prepend_namespace_to_yaml(namespace, yaml_path):
     with open(yaml_path, 'r') as f:
@@ -23,14 +22,17 @@ def prepend_namespace_to_yaml(namespace, yaml_path):
 
 def generate_launch_description():
     # Get URDF via xacro
-    robot_description_content = Command(
-        [
-            PathJoinSubstitution([FindExecutable(name="xacro")]),
-            " ",
-            PathJoinSubstitution(
-                [FindPackageShare("pan_tilt_hardware"), "urdf", "pan_tilt_standalone_pi.xacro"]
-            ),
-        ]
+    robot_description_content = ParameterValue(
+        Command(
+            [
+                PathJoinSubstitution([FindExecutable(name="xacro")]),
+                " ",
+                PathJoinSubstitution(
+                    [FindPackageShare("pan_tilt_hardware"), "urdf", "pan_tilt_standalone_pi.xacro"]
+                ),
+            ]
+        ),
+        value_type=str
     )
     robot_description = {"robot_description": robot_description_content}
 
