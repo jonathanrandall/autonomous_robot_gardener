@@ -19,6 +19,4 @@ pan_tilt_teleop:
     pan_speed: 0.05    # Radians per update when joystick is at full deflection
     tilt_speed: 0.05   # Radians per update when joystick is at full deflection
 
-    pan_tilt_controller_topic: /pi/pan_tilt_controller/commands
-
     publish_rate: 30.0 # Hz

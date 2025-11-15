@@ -29,7 +29,13 @@ def generate_launch_description():
         description='Use simulation clock if true'
     )
 
-   
+    pan_tilt_controller_topic_arg = DeclareLaunchArgument(
+        'pan_tilt_controller_topic',
+        default_value='/pi/pan_tilt_controller/commands',
+        description='Topic for pan tilt controller commands'
+    )
+
+
 
     # ros2 topic pub /pan_tilt_controller/commands std_msgs/msg/Float64MultiArray  "{data: [0.0, 0.15]}"
 
@@ -41,7 +47,10 @@ def generate_launch_description():
         executable='pan_tilt_teleop',
         name='pan_tilt_teleop',
         output='screen',
-        parameters=[teleop_config, {'use_sim_time': LaunchConfiguration('use_sim_time')}]
+        parameters=[teleop_config, {
+            'use_sim_time': LaunchConfiguration('use_sim_time'),
+            'pan_tilt_controller_topic': LaunchConfiguration('pan_tilt_controller_topic')
+        }]
     )
 
     # Joy Node for joystick input
@@ -54,9 +63,10 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
-        
+
         use_sim_time_arg,
+        pan_tilt_controller_topic_arg,
         joy_node,
-        
+
         pan_tilt_teleop
     ])
