@@ -57,6 +57,9 @@ RUN apt-get update && \
         ros-jazzy-joy \
         libserial-dev \
         psmisc && \
+        ros-jazzy-slam-toolbox && \
+        ros-jazzy-nav2-bringup && \
+        ros-jazzy-navigation2 && \
     rm -rf /var/lib/apt/lists/*
 
 # Rosdep update
@@ -74,7 +77,13 @@ RUN python3 -m venv /opt/venv && \
     /opt/venv/bin/pip install --upgrade pip setuptools wheel && \ 
     /opt/venv/bin/pip install ipython ipykernel ultralytics scikit-learn
 
+
+
+
 USER $USERNAME
+
+# pip install pybullet
+
 
 # Source the ROS setup file
 RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc

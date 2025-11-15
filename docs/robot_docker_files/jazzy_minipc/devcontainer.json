@@ -37,11 +37,11 @@
         "-e", "XAUTHORITY=${localEnv:XAUTHORITY}", // Optional
         "--group-add", "video",                      // Access GPU/video
         "--network=host",
-        "--group-add=dialout",
-        "--volume=/dev:/dev",
-        "--device=/dev/input/js*:/dev/input/js*",
-        "--device-cgroup-rule=c *:* rmw",
-        "--volume=/run/udev:/run/udev:ro"
+        "--group-add=dialout"
+        // "--volume=/dev:/dev",
+        // "--device=/dev/input/js*:/dev/input/js*",
+        // "--device-cgroup-rule=c *:* rmw",
+        // "--volume=/run/udev:/run/udev:ro"
     ],
     "containerUser": "ubuntu",                     // non-root user
     "remoteUser": "ubuntu",
