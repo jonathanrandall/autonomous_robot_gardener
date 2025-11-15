@@ -76,9 +76,21 @@ RUN python3 -m venv /opt/venv && \
     /opt/venv/bin/pip install --upgrade pip setuptools wheel && \ 
     /opt/venv/bin/pip install ipython ipykernel ultralytics scikit-learn
 
+# isntall pybullet
+# RUN /opt/venv/bin/pip install pybullet
 # Make sure you’re still root at this point
 # RUN sudo groupadd -r input && \
 #     sudo usermod -aG input ubuntu
+
+# pip install "numpy<2"
+# sudo apt install ros-jazzy-pal-statistics
+# sudo apt update
+# sudo apt install ros-jazzy-pal-statistics
+
+RUN apt-get update && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs && \
+    rm -rf /var/lib/apt/lists/*
+
 
 USER $USERNAME
 
