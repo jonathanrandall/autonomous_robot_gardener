@@ -4,7 +4,7 @@
   <name>pan_tilt_track</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="jonnyrandall@live.com.au">ros</maintainer>
+  <maintainer email="me@me.com">ros</maintainer>
   <license>TODO: License declaration</license>
 
   <depend>rclpy</depend>

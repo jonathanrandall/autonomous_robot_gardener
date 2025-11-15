@@ -400,7 +400,7 @@ ros2 launch diffdrive_arduino diffbot.launch.py
 
 ## Maintainers
 
-- Jonathan Randall - jonnyrandall@live.com.au
+- Jonathan Randall - 
 
 ## License
 

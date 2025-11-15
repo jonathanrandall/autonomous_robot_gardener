@@ -21,7 +21,7 @@ setup(
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='ubuntu',
-    maintainer_email='jonnyrandall@live.com.au',
+    maintainer_email='me@me.com',
     description='Pan tilt mechanism description with joystick teleop control for ROS2 Jazzy and Gazebo Harmonic',
     license='Apache-2.0',
     extras_require={

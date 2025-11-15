@@ -4,7 +4,7 @@
   <name>pan_tilt_description</name>
   <version>0.0.0</version>
   <description>Pan tilt mechanism description with joystick teleop control for ROS2 Jazzy and Gazebo Harmonic</description>
-  <maintainer email="jonnyrandall@live.com.au">ubuntu</maintainer>
+  <maintainer email="me@me.com">ubuntu</maintainer>
   <license>Apache-2.0</license>
 
   <depend>rclpy</depend>
