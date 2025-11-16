@@ -3,6 +3,14 @@ project(xarm_description)
 
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+find_package(geometry_msgs REQUIRED)
+
+# Generate action interfaces
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "action/ArmPickup.action"
+  DEPENDENCIES geometry_msgs
+)
 
 install(
   DIRECTORY config meshes launch worlds urdf
@@ -25,6 +33,11 @@ install(
 
 install(
   PROGRAMS scripts/ik_vertical_angle_node.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(
+  PROGRAMS scripts/ik_arm_pickup.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

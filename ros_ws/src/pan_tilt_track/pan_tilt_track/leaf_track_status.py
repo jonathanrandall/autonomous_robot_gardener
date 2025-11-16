@@ -9,7 +9,7 @@ import json
 import time
 
 
-class LeafTracker(Node):
+class LeafTrackerStatus(Node):
     def __init__(self):
         super().__init__('leaf_tracker')
 
@@ -219,7 +219,7 @@ class LeafTracker(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    node = LeafTracker()
+    node = LeafTrackerStatus()
 
     try:
         rclpy.spin(node)

@@ -1,0 +1,10 @@
+# Goal: Target position for the arm to move to
+geometry_msgs/Point target_position
+---
+# Result: Success or failure
+bool success
+string message
+---
+# Feedback: Current progress
+float32 progress
+string status
