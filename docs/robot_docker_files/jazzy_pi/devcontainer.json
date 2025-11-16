@@ -1,0 +1,34 @@
+{
+  "name": "humble desktop",
+  "dockerFile": "Dockerfile",
+  "runArgs": [
+    "--privileged",
+    "--network=host",
+    "--device=/dev/gpiomem",
+    "--device=/dev/i2c-10",
+    "--device=/dev/i2c-1",
+    "--device=/dev/video2",
+    "--group-add=44",   // replace with actual gid of i2c
+    "--group-add=994"    // replace with actual gid of video
+  ],
+  "workspaceMount": "source=${localWorkspaceFolder},target=/${localWorkspaceFolderBasename},type=bind",
+  "workspaceFolder": "/${localWorkspaceFolderBasename}",
+  "mounts": [
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.bash_history,target=/home/vscode/.bash_history,type=bind"
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools-extension-pack",
+        "ms-python.python"
+      ]
+    }
+  }
+}
+
+// docker build -t ros-jazzy-pi .
+// docker run -it --privileged \
+//     --device /dev/gpiomem \
+//     --device /dev/i2c-1 \
+//     ros-jazzy-pi
+// sudo chown -R ros:ros /robot_gardener
