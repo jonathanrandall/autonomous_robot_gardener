@@ -6,6 +6,12 @@ from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
 
+# You can launch it with:
+#   ros2 launch autonomous_robot post_mini_pc.launch.py
+
+#   Or with a custom angle:
+#   ros2 launch autonomous_robot post_mini_pc.launch.py angle:=45
+
 def generate_launch_description():
     # Declare launch argument
     angle_arg = DeclareLaunchArgument(

@@ -212,9 +212,10 @@ class IKVerticalAngleNode(BaseRobotGUI):
         # The vertical_angle is the tilt from vertical
         # pitch = pi/2 - vertical_angle (convert from vertical to horizontal reference)
         pitch = np.pi/2 - self.vertical_angle
+        roll = 0.0
 
         # Construct orientation: rotate around Z by yaw, then tilt by pitch
-        target_orientation = p.getQuaternionFromEuler([0, pitch, yaw])
+        target_orientation = p.getQuaternionFromEuler([roll, pitch, yaw])
 
         # Solve IK
         joint_positions = p.calculateInverseKinematics(
@@ -284,10 +285,10 @@ class IKVerticalAngleNode(BaseRobotGUI):
         controller_positions = [0.0] * 6
 
         # Set gripper joint to 0.01
-        controller_positions[0] = 0.01  # xarm_1_joint
+        controller_positions[0] = 0.005  # xarm_1_joint
 
         # Map arm joints (reverse order)
-        controller_positions[1] = float(pybullet_positions[4])  # xarm_2_joint
+        controller_positions[1] = 0.0 #float(pybullet_positions[4])  # xarm_2_joint
         controller_positions[2] = float(pybullet_positions[3])  # xarm_3_joint
         controller_positions[3] = float(pybullet_positions[2])  # xarm_4_joint
         controller_positions[4] = float(pybullet_positions[1])  # xarm_5_joint
