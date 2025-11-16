@@ -42,11 +42,11 @@ def generate_launch_description():
         ])
     )
 
-    # camera_to_ee node
+    # camera_to_ee node old version had camera_to_ee.py
     camera_to_ee_node = Node(
         package='autonomous_robot',
-        executable='camera_to_ee.py',
-        name='camera_to_ee'
+        executable='camera_to_ee_pickup.py',
+        name='camera_to_ee_pickup_node'
     )
 
     # ik_vertical_angle_node with parameter
@@ -59,10 +59,20 @@ def generate_launch_description():
         }]
     )
 
+    ik_arm_pickup_node = Node(
+        package='xarm_description',
+        executable='ik_arm_pickup.py',
+        name='ik_arm_pickup_node',
+        parameters=[{
+            'vertical_angle': LaunchConfiguration('angle')
+        }]
+    )
+
     return LaunchDescription([
         angle_arg,
         merge_joint_states_launch,
         pan_tilt_joy_launch,
         camera_to_ee_node,
-        ik_vertical_angle_node
+        ik_arm_pickup_node
+        # ik_vertical_angle_node
     ])

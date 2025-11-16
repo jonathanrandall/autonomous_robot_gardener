@@ -1,20 +1,17 @@
 #!/usr/bin/env python3
 """
-ik_arm_pickup.py - Action server for arm pickup using IK solver
+ik_vertical_angle_node.py - IK solver with vertical angle mode that subscribes to camera targets
+and publishes joint trajectories.
 
-This node provides an action server that:
-1. Receives a target position via action goal
-2. Computes IK solution
-3. Publishes joint trajectory
-4. Monitors joint states until arm reaches target
-5. Returns success/failure
+This node:
+1. Subscribes to cam_to_ee/ee_point topic (PointStamped)
+2. Computes IK using PyBullet with vertical_angle orientation mode
+3. Publishes joint trajectories via BaseRobotGUI
 """
 
 import rclpy
 from rclpy.node import Node
-from rclpy.action import ActionServer, GoalResponse, CancelResponse
 from geometry_msgs.msg import PointStamped
-from sensor_msgs.msg import JointState
 import numpy as np
 import pybullet as p
 import pybullet_data
@@ -23,27 +20,27 @@ import sys
 import tempfile
 import re
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
+from std_msgs.msg import Header
 from builtin_interfaces.msg import Duration
 
-# Add parent directory to path to import base_robot_gui
-sys.path.append(os.path.dirname(__file__))
-from xarm_description.base_robot_gui import BaseRobotGUI
+# Import base_robot_gui from same package
+from xarm_kinematics.base_robot_gui import BaseRobotGUI
 
-# Import action
-from xarm_description.action import ArmPickup
+# ros2 topic pub --once /cam_to_ee/ee_point geometry_msgs/msg/PointStamped "{header: {frame_id: 'camera_link'}, point: {x: 0.1, y: 0.1, z: 0.1}}"
+# ros2 run xarm_description ik_vertical_angle_node.py --ros-args -p vertical_angle:=-0.785  # 45 degrees
 
-
-class IKArmPickupServer(BaseRobotGUI):
+class IKVerticalAngleNode(BaseRobotGUI):
     """
-    Action server for arm pickup using IK solver.
+    IK solver that subscribes to target points and publishes joint trajectories.
+    Uses vertical_angle orientation mode for IK solving.
     """
 
-    def __init__(self, node_name='ik_arm_pickup_server',
+    def __init__(self, node_name='ik_vertical_angle_node',
                  trajectory_topic='/arm/hiwonder_xarm_controller/joint_trajectory',
                  urdf_path=None,
                  vertical_angle=0.0):
         """
-        Initialize the IK action server.
+        Initialize the IK node.
 
         Args:
             node_name: ROS node name
@@ -58,203 +55,26 @@ class IKArmPickupServer(BaseRobotGUI):
         self.declare_parameter('vertical_angle', vertical_angle)
         self.declare_parameter('urdf_path',
             '/workspaces/jazzy_docker/autonomous_robot_gardener/ros_ws/src/xarm_description/urdf/xarm_v2.urdf')
-        self.declare_parameter('position_tolerance', 0.05)  # radians
-        self.declare_parameter('controller_namespace', '')
 
         self.vertical_angle = self.get_parameter('vertical_angle').value
         urdf_path = self.get_parameter('urdf_path').value
-        self.position_tolerance = self.get_parameter('position_tolerance').value
-        controller_ns = self.get_parameter('controller_namespace').value
 
-        # Current joint states
-        self.current_joint_positions = {}
-        self.target_joint_positions = None
-
-        # Subscribe to joint states
-        joint_state_topic = f'{controller_ns}/joint_states' if controller_ns else '/joint_states'
-        self.joint_state_sub = self.create_subscription(
-            JointState,
-            joint_state_topic,
-            self.joint_state_callback,
-            10
-        )
-
-        self.get_logger().info(f"Initializing IK Arm Pickup Server with vertical_angle={self.vertical_angle:.3f} rad")
+        self.get_logger().info(f"Initializing IK solver with vertical_angle={self.vertical_angle:.3f} rad")
 
         # Initialize PyBullet IK solver
         self.init_pybullet_ik(urdf_path)
 
-        # Create action server
-        self._action_server = ActionServer(
-            self,
-            ArmPickup,
-            'ik_arm_pickup',
-            execute_callback=self.execute_callback,
-            goal_callback=self.goal_callback,
-            cancel_callback=self.cancel_callback
+        # Subscribe to target point topic
+        self.target_subscription = self.create_subscription(
+            PointStamped,
+            'cam_to_ee/ee_point',
+            self.target_callback,
+            10
         )
 
-        self.get_logger().info("IK Arm Pickup Action Server initialized")
+        self.get_logger().info("IK Vertical Angle Node initialized")
+        self.get_logger().info(f"Subscribing to: cam_to_ee/ee_point")
         self.get_logger().info(f"Publishing to: {trajectory_topic}")
-        self.get_logger().info(f"Subscribing to joint states from: {joint_state_topic}")
-
-    def joint_state_callback(self, msg):
-        """Update current joint positions from joint_states."""
-        for i, name in enumerate(msg.name):
-            if i < len(msg.position):
-                self.current_joint_positions[name] = msg.position[i]
-
-    def goal_callback(self, goal_request):
-        """Accept or reject incoming goal requests."""
-        self.get_logger().info('Received goal request')
-        return GoalResponse.ACCEPT
-
-    def cancel_callback(self, goal_handle):
-        """Handle cancel requests."""
-        self.get_logger().info('Received cancel request')
-        return CancelResponse.ACCEPT
-
-    def check_target_reached(self):
-        """Check if current joint positions are close to target positions."""
-        if self.target_joint_positions is None:
-            return False
-
-        for i, joint_name in enumerate(self.joint_names):
-            if joint_name not in self.current_joint_positions:
-                return False
-
-            current = self.current_joint_positions[joint_name]
-            target = self.target_joint_positions[i]
-            error = abs(current - target)
-
-            if error > self.position_tolerance:
-                return False
-
-        return True
-
-    async def execute_callback(self, goal_handle):
-        """
-        Execute the pickup action.
-
-        Args:
-            goal_handle: Action goal handle containing target position
-
-        Returns:
-            Result message with success status
-        """
-        self.get_logger().info('Executing goal...')
-
-        # Get target position from goal
-        target_position = [
-            goal_handle.request.target_position.x,
-            goal_handle.request.target_position.y,
-            goal_handle.request.target_position.z
-        ]
-
-        self.get_logger().info(
-            f"Target position: [{target_position[0]:.3f}, {target_position[1]:.3f}, {target_position[2]:.3f}]"
-        )
-
-        # Create feedback message
-        feedback_msg = ArmPickup.Feedback()
-
-        # Solve IK
-        try:
-            feedback_msg.progress = 0.1
-            feedback_msg.status = 'Computing IK solution'
-            goal_handle.publish_feedback(feedback_msg)
-
-            pybullet_joint_positions = self.solve_ik(target_position)
-
-            if pybullet_joint_positions is None:
-                self.get_logger().error("IK solution failed!")
-                goal_handle.abort()
-                result = ArmPickup.Result()
-                result.success = False
-                result.message = "IK solution failed"
-                return result
-
-            self.get_logger().info(f"IK solution (PyBullet order):")
-            for name, pos in zip(self.pybullet_joint_names, pybullet_joint_positions):
-                self.get_logger().info(f"  {name}: {pos:+.4f} rad ({np.degrees(pos):+.2f}°)")
-
-            # Map to controller order
-            controller_joint_positions = self.map_pybullet_to_controller_order(pybullet_joint_positions)
-            self.target_joint_positions = controller_joint_positions
-
-            self.get_logger().info(f"Mapped to controller order:")
-            for name, pos in zip(self.joint_names, controller_joint_positions):
-                self.get_logger().info(f"  {name}: {pos:+.4f} rad ({np.degrees(pos):+.2f}°)")
-
-            # Publish trajectory
-            feedback_msg.progress = 0.3
-            feedback_msg.status = 'Sending trajectory'
-            goal_handle.publish_feedback(feedback_msg)
-
-            self.current_positions = controller_joint_positions
-            self.send_all_joints(controller_joint_positions, time_from_start_sec=2)
-
-            self.get_logger().info("Published joint trajectory")
-
-            # Wait for arm to reach target
-            feedback_msg.progress = 0.5
-            feedback_msg.status = 'Moving to target'
-            goal_handle.publish_feedback(feedback_msg)
-
-            # Monitor until target is reached or timeout
-            rate = self.create_rate(10)  # 10 Hz
-            timeout = 10.0  # seconds
-            start_time = self.get_clock().now()
-
-            while rclpy.ok():
-                # Check if goal was cancelled
-                if goal_handle.is_cancel_requested:
-                    goal_handle.canceled()
-                    result = ArmPickup.Result()
-                    result.success = False
-                    result.message = "Goal cancelled"
-                    return result
-
-                # Check if target reached
-                if self.check_target_reached():
-                    feedback_msg.progress = 1.0
-                    feedback_msg.status = 'Target reached'
-                    goal_handle.publish_feedback(feedback_msg)
-
-                    goal_handle.succeed()
-                    result = ArmPickup.Result()
-                    result.success = True
-                    result.message = "Successfully reached target position"
-                    self.get_logger().info("Target reached!")
-                    return result
-
-                # Check timeout
-                elapsed = (self.get_clock().now() - start_time).nanoseconds / 1e9
-                if elapsed > timeout:
-                    self.get_logger().warn("Timeout waiting for arm to reach target")
-                    goal_handle.abort()
-                    result = ArmPickup.Result()
-                    result.success = False
-                    result.message = "Timeout waiting for target"
-                    return result
-
-                # Update progress
-                progress = 0.5 + (elapsed / timeout) * 0.5
-                feedback_msg.progress = min(progress, 0.99)
-                feedback_msg.status = f'Moving to target ({elapsed:.1f}s)'
-                goal_handle.publish_feedback(feedback_msg)
-
-                rate.sleep()
-
-        except Exception as e:
-            self.get_logger().error(f"Error in action execution: {e}")
-            import traceback
-            self.get_logger().error(traceback.format_exc())
-            goal_handle.abort()
-            result = ArmPickup.Result()
-            result.success = False
-            result.message = f"Error: {str(e)}"
-            return result
 
     def preprocess_urdf(self, urdf_path):
         """
@@ -350,7 +170,7 @@ class IKArmPickupServer(BaseRobotGUI):
         ]
 
         # Find end effector link
-        self.ee_link_name = 'finger_pinch_link'
+        self.ee_link_name ='finger_pinch_link'# 'eef_base_link'
         self.ee_link_index = None
 
         # Try to find end effector link
@@ -467,7 +287,7 @@ class IKArmPickupServer(BaseRobotGUI):
         controller_positions[0] = 0.005  # xarm_1_joint
 
         # Map arm joints (reverse order)
-        controller_positions[1] = 0.0  # float(pybullet_positions[4])  # xarm_2_joint
+        controller_positions[1] = 0.0 #float(pybullet_positions[4])  # xarm_2_joint
         controller_positions[2] = float(pybullet_positions[3])  # xarm_3_joint
         controller_positions[3] = float(pybullet_positions[2])  # xarm_4_joint
         controller_positions[4] = float(pybullet_positions[1])  # xarm_5_joint
@@ -475,17 +295,58 @@ class IKArmPickupServer(BaseRobotGUI):
 
         return controller_positions
 
+    def target_callback(self, msg):
+        """
+        Callback for target point messages.
+        Solves IK and publishes joint trajectory.
+
+        Args:
+            msg: PointStamped message with target position
+        """
+        target_position = [msg.point.x, msg.point.y, msg.point.z]
+
+        self.get_logger().info(f"Received target: [{target_position[0]:.3f}, {target_position[1]:.3f}, {target_position[2]:.3f}]")
+
+        # Solve IK
+        try:
+            pybullet_joint_positions = self.solve_ik(target_position)
+
+            if pybullet_joint_positions is None:
+                self.get_logger().error("IK solution failed!")
+                return
+
+            self.get_logger().info(f"IK solution (PyBullet order):")
+            for name, pos in zip(self.pybullet_joint_names, pybullet_joint_positions):
+                self.get_logger().info(f"  {name}: {pos:+.4f} rad ({np.degrees(pos):+.2f}°)")
+
+            # Map to controller order
+            controller_joint_positions = self.map_pybullet_to_controller_order(pybullet_joint_positions)
+
+            self.get_logger().info(f"Mapped to controller order:")
+            for name, pos in zip(self.joint_names, controller_joint_positions):
+                self.get_logger().info(f"  {name}: {pos:+.4f} rad ({np.degrees(pos):+.2f}°)")
+
+            # Update current positions and publish trajectory
+            self.current_positions = controller_joint_positions
+            self.send_all_joints(controller_joint_positions, time_from_start_sec=1)
+
+            self.get_logger().info("Published joint trajectory")
+
+        except Exception as e:
+            self.get_logger().error(f"Error in IK solving: {e}")
+            import traceback
+            self.get_logger().error(traceback.format_exc())
+
+    
     def send_all_joints(self, joint_angles, time_from_start_sec=1):
         """Send all joint positions to the controller"""
+        
         trajectory = JointTrajectory()
         trajectory.joint_names = self.joint_names
-        trajectory.points = [JointTrajectoryPoint(
-            positions=joint_angles,
-            time_from_start=Duration(sec=time_from_start_sec)
-        )]
+        trajectory.points = [JointTrajectoryPoint(positions=joint_angles, time_from_start=Duration(sec=time_from_start_sec))]
         self.trajectory_pub.publish(trajectory)
         return trajectory
-
+    
     def cleanup(self):
         """Clean up PyBullet connection and temporary files"""
         if hasattr(self, 'physics_client'):
@@ -502,7 +363,7 @@ def main(args=None):
     rclpy.init(args=args)
 
     try:
-        node = IKArmPickupServer()
+        node = IKVerticalAngleNode()
 
         try:
             rclpy.spin(node)

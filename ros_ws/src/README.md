@@ -79,22 +79,27 @@ The autonomous robot gardener combines:
 **Nodes**:
 - `person_tracker` - Tracks person/remote objects (legacy)
 - `leaf_tracker` - Tracks leaf objects with distance filtering
+- `leaf_track_status` - Tracks leaf objects and publishes tracking status
 
-**Key Features** (leaf_tracker):
+**Key Features** (leaf_track_status):
 - Filters detections with confidence > 0.35
 - Selects closest object (minimum distance_cm)
 - Ignores objects farther than 45cm
 - Proportional control with configurable scale factors
 - Deadzone (±0.015 rad) to prevent jitter
 - Publishes target distance to `dist_camera` topic
+- Publishes tracking status: `no_detections`, `tracking`, or `target_acquired`
+- Subscribes to pickup state to pause tracking during manipulation
 
 **Topics Subscribed**:
 - `/detections/labels_distances` - Detection data from image_sync_processor
 - `/pi/joint_states` - Current pan/tilt servo positions
+- `/pickup_state` (String) - Current pickup state (IDLE/BUSY)
 
 **Topics Published**:
 - `/pi/pan_tilt_controller/commands` - Servo position commands
 - `/dist_camera` (PointStamped) - Target object distance in camera frame
+- `/track_status` (String) - Tracking status
 
 **Launch Files**:
 - `leaf_tracker.launch.py` - Start leaf tracking with configurable parameters
@@ -150,18 +155,25 @@ The autonomous robot gardener combines:
 
 **Nodes**:
 - `camera_to_ee` - Transforms camera frame coordinates to end-effector frame
+- `camera_to_ee_pickup` - Coordinates pickup action with tracking status
 - `joint_state_merger` - Merges joint states from multiple robot components
 
-**Key Features** (camera_to_ee):
+**Key Features** (camera_to_ee_pickup):
 - Subscribes to `/dist_camera` topic from pan_tilt_track
+- Subscribes to `/track_status` to detect target acquisition
 - Uses TF2 to transform points from camera frame to robot base frame
 - Publishes transformed points for manipulation planning
+- Publishes pickup state (IDLE/BUSY) to coordinate with tracking
+- Calls `ik_arm_pickup` action when target acquired
 
 **Topics**:
-- Subscribed: `/dist_camera` (PointStamped)
+- Subscribed:
+  - `/dist_camera` (PointStamped) - Target distance from tracker
+  - `/track_status` (String) - Tracking status
 - Published:
   - `/cam_to_ee/camera_point` - Point in camera frame
   - `/cam_to_ee/ee_point` - Point in end-effector frame
+  - `/pickup_state` (String) - Pickup state (IDLE/BUSY)
 
 **Parameters**:
 - `robot_namespace` - TF frame namespace prefix
@@ -171,14 +183,16 @@ The autonomous robot gardener combines:
 ### 7. `xarm_description`
 
 **Type**: C++ package (ament_cmake)
-**Description**: URDF description and simulation for 4-DOF xArm robotic manipulator.
+**Description**: URDF description, simulation setup, and action definitions for 4-DOF xArm robotic manipulator.
 
 **Key Features**:
 - Complete robot URDF with meshes
 - Gazebo simulation support
-- Inverse kinematics using IKPy library
-- Joystick control node
-- Trajectory execution
+- Action definitions for arm manipulation
+- Joystick control and GUI tools
+
+**Action Definitions**:
+- `ArmPickup.action` - Pickup action with target position goal
 
 **Launch Files**:
 - `gz.launch.py` - Gazebo simulation
@@ -187,14 +201,57 @@ The autonomous robot gardener combines:
 - `view_robot.launch.py` - RViz visualization
 - `joint_slider_gui.launch.py` - GUI joint control
 
+**Scripts**:
+- `joint_slider_gui.py` - GUI for manual joint control
+- `min_joy_listen_v2.py` - Joystick teleoperation
+
 **Dependencies**:
-- `python3-ikpy` - Inverse kinematics solver
 - `trajectory_msgs` - Trajectory execution
 - `gz_ros2_control` - Gazebo control integration
+- `geometry_msgs` - Action interface types
 
 ---
 
-### 8. `xarm_hardware`
+### 8. `xarm_kinematics`
+
+**Type**: Python package (ament_python)
+**Description**: Inverse kinematics nodes for xArm manipulation using PyBullet.
+
+**Nodes**:
+- `ik_vertical_angle_node` - Subscribes to target points and computes IK solutions
+- `ik_arm_pickup` - Action server for pickup operations with joint state monitoring
+
+**Key Features** (ik_arm_pickup):
+- Action server implementing `ArmPickup` action
+- PyBullet-based IK solver with vertical angle orientation mode
+- Monitors joint states to detect when target position is reached
+- Publishes joint trajectories to arm controller
+- Provides feedback during action execution
+
+**Topics**:
+- Subscribed:
+  - `/cam_to_ee/ee_point` (PointStamped) - Target position in end-effector frame
+  - `/joint_states` (JointState) - Current arm joint positions
+- Published:
+  - `/arm/hiwonder_xarm_controller/joint_trajectory` - Joint trajectory commands
+
+**Actions**:
+- `ik_arm_pickup` (ArmPickup) - Pickup action server
+
+**Parameters**:
+- `vertical_angle` (default: 0.0) - End-effector tilt angle from horizontal
+- `urdf_path` - Path to robot URDF file
+- `position_tolerance` (default: 0.05 rad) - Joint position error tolerance
+- `controller_namespace` - Namespace for joint state topic
+
+**Dependencies**:
+- `python3-pybullet` - Physics simulation for IK
+- `python3-numpy` - Numerical computations
+- `xarm_description` - Action definitions
+
+---
+
+### 9. `xarm_hardware`
 
 **Type**: C++ package (ament_cmake)
 **Description**: Hardware interface for xArm using serial communication with ESP32.
@@ -216,7 +273,7 @@ The autonomous robot gardener combines:
 
 ---
 
-### 9. `diffdrive_arduino`
+### 10. `diffdrive_arduino`
 
 **Type**: C++ package (ament_cmake)
 **Description**: ROS 2 Control hardware interface for differential drive robot with Arduino.
@@ -298,14 +355,17 @@ source install/setup.bash
 colcon build --packages-select camera_publisher
 colcon build --packages-select image_sync_processor
 colcon build --packages-select pan_tilt_track
+colcon build --packages-select xarm_kinematics
+
+# Mixed C++/Python packages
 colcon build --packages-select autonomous_robot
+colcon build --packages-select pan_tilt_description
 
 # C++ packages
 colcon build --packages-select pan_tilt_hardware
 colcon build --packages-select xarm_hardware
 colcon build --packages-select diffdrive_arduino
 colcon build --packages-select xarm_description
-colcon build --packages-select pan_tilt_description
 ```
 
 ---
@@ -325,19 +385,25 @@ ros2 run camera_publisher tof_publisher
 ros2 run image_sync_processor image_sync_node
 ```
 
-### 3. Start Leaf Tracking
+### 3. Start Leaf Tracking with Status
 
 ```bash
-ros2 launch pan_tilt_track leaf_tracker.launch.py
+ros2 run pan_tilt_track leaf_track_status
 ```
 
-### 4. Start Camera-to-EE Transform
+### 4. Start IK Pickup Action Server
 
 ```bash
-ros2 run autonomous_robot camera_to_ee
+ros2 run xarm_kinematics ik_arm_pickup
 ```
 
-### 5. Start Robot Hardware (choose one)
+### 5. Start Camera-to-EE Pickup Coordinator
+
+```bash
+ros2 run autonomous_robot camera_to_ee_pickup
+```
+
+### 6. Start Robot Hardware (choose one)
 
 #### xArm:
 ```bash

@@ -7,7 +7,7 @@ from tf2_ros import Buffer, TransformListener
 from geometry_msgs.msg import PointStamped, Point
 from std_msgs.msg import String
 import tf2_geometry_msgs  # gives do_transform_point
-from xarm_description.action import ArmPickup
+from xarm_kinematics.action import ArmPickup
 
 
 class CameraToEEPickup(Node):
