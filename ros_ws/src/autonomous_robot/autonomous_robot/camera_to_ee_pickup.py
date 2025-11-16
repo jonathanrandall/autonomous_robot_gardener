@@ -63,7 +63,7 @@ class CameraToEEPickup(Node):
         self.timer = self.create_timer(1.0, self.timer_callback)
 
         # Publish initial IDLE state
-        self.publish_pickup_state('IDLE')
+        self.publish_pickup_state(self.pickup_state)
 
         self.get_logger().info('Camera to EE Pickup node started')
 
@@ -120,7 +120,7 @@ class CameraToEEPickup(Node):
                 point_cam.header.stamp = self.get_clock().now().to_msg()
                 point_cam.point.x = -0.0
                 point_cam.point.y = -0.0
-                point_cam.point.z = 0.2
+                point_cam.point.z = 0.3
 
             # Transform it
             point_ee = tf2_geometry_msgs.do_transform_point(point_cam, trans)

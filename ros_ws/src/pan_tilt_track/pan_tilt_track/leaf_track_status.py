@@ -114,8 +114,19 @@ class LeafTrackerStatus(Node):
         """Process detections and control servos to center on leaf."""
         try:
             # If pickup is busy, just publish the last known camera point and return
+            if self.pickup_state == 'IDLE' and hasattr(self, 'prev_state') and self.prev_state == 'BUSY':
+                self.status = 'no_detections'
+                self.publish_track_status(self.status)
+                cmd_msg = Float64MultiArray()
+                cmd_msg.data = [0.0, 0.0]
+                self.command_pub.publish(cmd_msg)
+                time.sleep(1.0)  # Small delay to allow servo movement
+                self.prev_state = 'IDLE'
+                return
+
             if self.pickup_state == 'BUSY':
                 self.pub_dist_cam.publish(self.point_cam)
+                self.prev_state = 'BUSY'
                 return
 
             detections = json.loads(msg.data)
