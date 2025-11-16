@@ -31,6 +31,7 @@ setup(
         'console_scripts': [
             'person_tracker = pan_tilt_track.person_tracker:main',
             'leaf_tracker = pan_tilt_track.leaf_tracker:main',
+            'leaf_track_status = pan_tilt_track.leaf_track_status:main',
         ],
     },
 )
