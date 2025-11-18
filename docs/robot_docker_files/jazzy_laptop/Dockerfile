@@ -86,6 +86,8 @@ RUN python3 -m venv /opt/venv && \
 # sudo apt install ros-jazzy-pal-statistics
 # sudo apt update
 # sudo apt install ros-jazzy-pal-statistics
+# /opt/venv/bin/python3 -m pip install empy
+# /opt/venv/bin/python3 -m pip install lark-parser
 
 RUN apt-get update && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
     apt-get install -y nodejs && \

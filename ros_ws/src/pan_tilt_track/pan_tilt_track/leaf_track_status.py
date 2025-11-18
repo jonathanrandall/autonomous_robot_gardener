@@ -112,6 +112,7 @@ class LeafTrackerStatus(Node):
 
     def detection_callback(self, msg):
         """Process detections and control servos to center on leaf."""
+        condition1 , condition2 = False, False
         try:
             # If pickup is busy, just publish the last known camera point and return
             if self.pickup_state == 'IDLE' and hasattr(self, 'prev_state') and self.prev_state == 'BUSY':
@@ -191,12 +192,14 @@ class LeafTrackerStatus(Node):
             pan_offset = -((x_center - img_center_x) / xn) * self.scale_factor_x
             if pan_offset < 0.015 and pan_offset > -0.015:
                 pan_offset = 0.0  # Deadzone to prevent jitter
+                condition1 = True
             tilt_offset = ((y_center - img_center_y) / yn) * self.scale_factor_y
             if tilt_offset < 0.015 and tilt_offset > -0.015:
                 tilt_offset = 0.0  # Deadzone to prevent jitter
+                condition2 = True
 
             # Determine tracking status based on offsets
-            if pan_offset == 0.0 and tilt_offset == 0.0:
+            if condition1 and condition2:
                 self.status = 'target_acquired'                
             else:
                 self.status = 'tracking'
