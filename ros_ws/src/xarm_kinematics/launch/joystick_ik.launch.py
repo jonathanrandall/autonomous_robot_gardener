@@ -57,7 +57,7 @@ def generate_launch_description():
         # )
 
         Node(
-            package='xarm_description',
+            package='xarm_kinematics',
             executable='min_joy_listen_v2.py',
             name='min_joy_listen_v2',
             output='screen',

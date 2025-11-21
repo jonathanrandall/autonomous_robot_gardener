@@ -22,7 +22,7 @@ def generate_launch_description():
         
         # Launch the joint slider GUI
         Node(
-            package='xarm_description',
+            package='xarm_kinematics',
             executable='joint_slider_gui.py',
             name='joint_slider_gui',
             output='screen',
