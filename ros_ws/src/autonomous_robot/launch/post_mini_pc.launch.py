@@ -51,7 +51,7 @@ def generate_launch_description():
 
     # ik_vertical_angle_node with parameter
     ik_vertical_angle_node = Node(
-        package='xarm_description',
+        package='xarm_kinematics',
         executable='ik_vertical_angle_node.py',
         name='ik_vertical_angle_node',
         parameters=[{
@@ -60,7 +60,7 @@ def generate_launch_description():
     )
 
     ik_arm_pickup_node = Node(
-        package='xarm_description',
+        package='xarm_kinematics',
         executable='ik_arm_pickup.py',
         name='ik_arm_pickup_node',
         parameters=[{
