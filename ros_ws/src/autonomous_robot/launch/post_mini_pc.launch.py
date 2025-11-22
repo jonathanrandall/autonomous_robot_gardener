@@ -42,6 +42,12 @@ def generate_launch_description():
         ])
     )
 
+    image_sync_node = Node(
+        package='image_sync_processor',
+        executable='image_sync_node',
+        name='image_sync_node'
+    )
+
     # camera_to_ee node old version had camera_to_ee.py
     camera_to_ee_node = Node(
         package='autonomous_robot',
@@ -72,6 +78,7 @@ def generate_launch_description():
         angle_arg,
         merge_joint_states_launch,
         pan_tilt_joy_launch,
+        image_sync_node,
         camera_to_ee_node,
         ik_arm_pickup_node
         # ik_vertical_angle_node
