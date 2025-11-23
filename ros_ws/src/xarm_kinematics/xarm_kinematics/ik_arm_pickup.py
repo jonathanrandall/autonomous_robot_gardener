@@ -13,6 +13,7 @@ This node provides an action server that:
 import rclpy
 from rclpy.node import Node
 from rclpy.action import ActionServer, GoalResponse, CancelResponse
+# from rclpy.executors import MultiThreadedExecutor
 from geometry_msgs.msg import PointStamped
 from sensor_msgs.msg import JointState
 import numpy as np
@@ -103,6 +104,7 @@ class IKArmPickupServer(BaseRobotGUI):
         for i, name in enumerate(msg.name):
             if i < len(msg.position):
                 self.current_joint_positions[name] = msg.position[i]
+        self.get_logger().debug(f'Joint states updated: {list(self.current_joint_positions.keys())}')
 
     def goal_callback(self, goal_request):
         """Accept or reject incoming goal requests."""
@@ -262,7 +264,8 @@ class IKArmPickupServer(BaseRobotGUI):
                 feedback_msg.status = f'Moving to target ({elapsed:.1f}s)'
                 goal_handle.publish_feedback(feedback_msg)
 
-                time.sleep(sleep_duration)
+                # Spin once to process callbacks (like joint_state updates) during the wait
+                rclpy.spin_once(self, timeout_sec=sleep_duration)
 
         except Exception as e:
             self.get_logger().error(f"Error in action execution: {e}")

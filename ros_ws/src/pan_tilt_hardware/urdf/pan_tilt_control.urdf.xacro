@@ -33,7 +33,7 @@
           <param name="max">1.57</param>   <!-- +90 degrees -->
         </command_interface>
         <state_interface name="position">
-          <param name="initial_value">0.0</param>
+          <param name="initial_value">1.2</param>
         </state_interface>
       </joint>
 
@@ -43,7 +43,7 @@
           <param name="max">1.57</param>   <!-- +90 degrees -->
         </command_interface>
         <state_interface name="position">
-          <param name="initial_value">0.0</param>
+          <param name="initial_value">-0.15</param>
         </state_interface>
       </joint>
 

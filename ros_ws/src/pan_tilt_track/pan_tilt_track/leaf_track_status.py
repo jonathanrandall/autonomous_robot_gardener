@@ -21,6 +21,7 @@ class LeafTrackerStatus(Node):
         self.status = 'no_detections'
         self.point_cam = PointStamped()
         self.pickup_state = ''
+        self.initial_positions = [1.2, -0.15]  # Initial pan and tilt positions
 
         # Get parameters
         self.scale_factor_x = self.get_parameter('scale_factor_x').value
@@ -119,7 +120,7 @@ class LeafTrackerStatus(Node):
                 self.status = 'no_detections'
                 self.publish_track_status(self.status)
                 cmd_msg = Float64MultiArray()
-                cmd_msg.data = [0.0, 0.0]
+                cmd_msg.data = self.initial_positions
                 self.command_pub.publish(cmd_msg)
                 time.sleep(1.0)  # Small delay to allow servo movement
                 self.prev_state = 'IDLE'
