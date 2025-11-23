@@ -22,6 +22,7 @@ import os
 import sys
 import tempfile
 import re
+import time
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from builtin_interfaces.msg import Duration
 
@@ -116,20 +117,37 @@ class IKArmPickupServer(BaseRobotGUI):
     def check_target_reached(self):
         """Check if current joint positions are close to target positions."""
         if self.target_joint_positions is None:
+            self.get_logger().debug('No target positions set')
             return False
 
+        # Log current joint positions (only once per check to avoid spam)
+        if not hasattr(self, '_last_check_log'):
+            self._last_check_log = 0
+
+        current_time = time.time()
+        should_log = (current_time - self._last_check_log) > 2.0  # Log every 2 seconds
+
+        all_within_tolerance = True
         for i, joint_name in enumerate(self.joint_names):
             if joint_name not in self.current_joint_positions:
+                if should_log:
+                    self.get_logger().warn(f'Joint {joint_name} not in current_joint_positions. Available: {list(self.current_joint_positions.keys())}')
                 return False
 
             current = self.current_joint_positions[joint_name]
             target = self.target_joint_positions[i]
             error = abs(current - target)
 
-            if error > self.position_tolerance:
-                return False
+            if should_log:
+                self.get_logger().info(f'{joint_name}: current={current:.4f}, target={target:.4f}, error={error:.4f}, tol={self.position_tolerance:.4f}')
 
-        return True
+            if error > self.position_tolerance:
+                all_within_tolerance = False
+
+        if should_log:
+            self._last_check_log = current_time
+
+        return all_within_tolerance
 
     async def execute_callback(self, goal_handle):
         """
@@ -201,7 +219,8 @@ class IKArmPickupServer(BaseRobotGUI):
             goal_handle.publish_feedback(feedback_msg)
 
             # Monitor until target is reached or timeout
-            rate = self.create_rate(10)  # 10 Hz
+            loop_rate = 10.0  # Hz
+            sleep_duration = 1.0 / loop_rate
             timeout = 10.0  # seconds
             start_time = self.get_clock().now()
 
@@ -243,7 +262,7 @@ class IKArmPickupServer(BaseRobotGUI):
                 feedback_msg.status = f'Moving to target ({elapsed:.1f}s)'
                 goal_handle.publish_feedback(feedback_msg)
 
-                rate.sleep()
+                time.sleep(sleep_duration)
 
         except Exception as e:
             self.get_logger().error(f"Error in action execution: {e}")
