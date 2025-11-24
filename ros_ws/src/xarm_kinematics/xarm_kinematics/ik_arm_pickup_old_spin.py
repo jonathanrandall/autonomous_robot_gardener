@@ -8,14 +8,12 @@ This node provides an action server that:
 3. Publishes joint trajectory
 4. Monitors joint states until arm reaches target
 5. Returns success/failure
-
-Rewritten with async/await and MultiThreadedExecutor for modern ROS2 patterns.
 """
 
 import rclpy
 from rclpy.node import Node
 from rclpy.action import ActionServer, GoalResponse, CancelResponse
-from rclpy.executors import MultiThreadedExecutor
+# from rclpy.executors import MultiThreadedExecutor
 from geometry_msgs.msg import PointStamped
 from sensor_msgs.msg import JointState
 import numpy as np
@@ -26,7 +24,6 @@ import sys
 import tempfile
 import re
 import time
-import asyncio
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from builtin_interfaces.msg import Duration
 
@@ -154,53 +151,6 @@ class IKArmPickupServer(BaseRobotGUI):
 
         return all_within_tolerance
 
-    async def wait_until_reached(self, goal_handle, timeout_sec: float) -> bool:
-        """
-        Async helper to wait until the target is reached or timeout occurs.
-
-        Args:
-            goal_handle: Action goal handle for cancellation checks
-            timeout_sec: Maximum time to wait in seconds
-
-        Returns:
-            bool: True if target reached, False if timeout, cancelled, or shutdown
-        """
-        loop_rate = 10.0  # Hz
-        sleep_duration = 1.0 / loop_rate
-        start_time = self.get_clock().now()
-
-        feedback_msg = ArmPickup.Feedback()
-
-        while rclpy.ok():
-            # Check if goal was cancelled
-            if goal_handle.is_cancel_requested:
-                self.get_logger().info('Goal cancelled during wait')
-                return False
-
-            # Check if target reached
-            if self.check_target_reached():
-                self.get_logger().info("Target reached!")
-                return True
-
-            # Check timeout
-            elapsed = (self.get_clock().now() - start_time).nanoseconds / 1e9
-            if elapsed > timeout_sec:
-                self.get_logger().warn("Timeout waiting for arm to reach target")
-                return False
-
-            # Update progress feedback
-            progress = 0.5 + (elapsed / timeout_sec) * 0.5
-            feedback_msg.progress = min(progress, 0.99)
-            feedback_msg.status = f'Moving to target ({elapsed:.1f}s)'
-            goal_handle.publish_feedback(feedback_msg)
-
-            # Non-blocking sleep using asyncio
-            await asyncio.sleep(sleep_duration)
-
-        # If we exit the loop, rclpy is shutting down
-        self.get_logger().info("Node shutting down during wait")
-        return False
-
     async def execute_callback(self, goal_handle):
         """
         Execute the pickup action.
@@ -265,85 +215,57 @@ class IKArmPickupServer(BaseRobotGUI):
 
             self.get_logger().info("Published joint trajectory")
 
-            # Wait for arm to reach target using async helper
+            # Wait for arm to reach target
             feedback_msg.progress = 0.5
             feedback_msg.status = 'Moving to target'
             goal_handle.publish_feedback(feedback_msg)
 
-            # Use async helper function to wait
+            # Monitor until target is reached or timeout
+            loop_rate = 10.0  # Hz
+            sleep_duration = 1.0 / loop_rate
             timeout = 10.0  # seconds
-            reached = await self.wait_until_reached(goal_handle, timeout)
+            start_time = self.get_clock().now()
 
-            # Check if cancelled - if so, abort without gripper sequence
-            if goal_handle.is_cancel_requested:
-                goal_handle.canceled()
-                result = ArmPickup.Result()
-                result.success = False
-                result.message = "Goal cancelled"
-                return result
+            while rclpy.ok():
+                # Check if goal was cancelled
+                if goal_handle.is_cancel_requested:
+                    goal_handle.canceled()
+                    result = ArmPickup.Result()
+                    result.success = False
+                    result.message = "Goal cancelled"
+                    return result
 
-            # Close gripper whether target reached or timed out
-            self.get_logger().info("Closing gripper...")
-            feedback_msg.progress = 0.85
-            feedback_msg.status = 'Closing gripper'
-            goal_handle.publish_feedback(feedback_msg)
+                # Check if target reached
+                if self.check_target_reached():
+                    feedback_msg.progress = 1.0
+                    feedback_msg.status = 'Target reached'
+                    goal_handle.publish_feedback(feedback_msg)
 
-            controller_joint_positions_closed = self.map_pybullet_to_controller_order(
-                pybullet_joint_positions, gripper_opening=0.028
-            )
-            self.send_all_joints(controller_joint_positions_closed, time_from_start_sec=1)
-            self.current_joint_positions = controller_joint_positions_closed
-            # Wait 2 seconds
-            await asyncio.sleep(2.0)
+                    goal_handle.succeed()
+                    result = ArmPickup.Result()
+                    result.success = True
+                    result.message = "Successfully reached target position"
+                    self.get_logger().info("Target reached!")
+                    return result
 
-            # Send all joints to zero except gripper (0.028 - fully closed)
-            self.get_logger().info("Moving all joints to zero (gripper closed)...")
-            feedback_msg.progress = 0.90
-            feedback_msg.status = 'Returning to zero with closed gripper'
-            goal_handle.publish_feedback(feedback_msg)
+                # Check timeout
+                elapsed = (self.get_clock().now() - start_time).nanoseconds / 1e9
+                if elapsed > timeout:
+                    self.get_logger().warn("Timeout waiting for arm to reach target")
+                    goal_handle.abort()
+                    result = ArmPickup.Result()
+                    result.success = False
+                    result.message = "Timeout waiting for target"
+                    return result
 
-            zero_positions_gripper_closed = self.map_pybullet_to_controller_order(
-                [0.0]*6, gripper_opening=0.028
-            )
-            self.send_all_joints(zero_positions_gripper_closed, time_from_start_sec=1)
-            self.current_joint_positions = zero_positions_gripper_closed
-            # Wait 2 seconds
-            await asyncio.sleep(2.0)
-
-            # Send all joints to zero and gripper to 0.005 (open)
-            self.get_logger().info("Opening gripper and returning to zero...")
-            feedback_msg.progress = 0.95
-            feedback_msg.status = 'Opening gripper'
-            goal_handle.publish_feedback(feedback_msg)
-
-            zero_positions = self.map_pybullet_to_controller_order(
-                [0.0]*6, gripper_opening=0.005
-            )
-            self.send_all_joints(zero_positions, time_from_start_sec=1)
-            self.current_joint_positions = zero_positions
-
-            if reached:
-                # Success - target was reached
-                feedback_msg.progress = 1.0
-                feedback_msg.status = 'Target reached and gripper sequence complete'
+                # Update progress
+                progress = 0.5 + (elapsed / timeout) * 0.5
+                feedback_msg.progress = min(progress, 0.99)
+                feedback_msg.status = f'Moving to target ({elapsed:.1f}s)'
                 goal_handle.publish_feedback(feedback_msg)
 
-                goal_handle.succeed()
-                result = ArmPickup.Result()
-                result.success = True
-                result.message = "Successfully reached target position and completed gripper sequence"
-                return result
-            else:
-                # Timeout - but gripper sequence was completed
-                feedback_msg.progress = 1.0
-                feedback_msg.status = 'Timeout but gripper sequence complete'
-                goal_handle.publish_feedback(feedback_msg)
-
-                goal_handle.abort()
-                result = ArmPickup.Result()
-                result.success = False
-                result.message = "Timeout waiting for target, but gripper sequence completed"
-                return result
+                # Spin once to process callbacks (like joint_state updates) during the wait
+                rclpy.spin_once(self, timeout_sec=sleep_duration)
 
         except Exception as e:
             self.get_logger().error(f"Error in action execution: {e}")
@@ -527,7 +449,7 @@ class IKArmPickupServer(BaseRobotGUI):
 
         return np.array(control_joint_positions)
 
-    def map_pybullet_to_controller_order(self, pybullet_positions, gripper_opening=0.005):
+    def map_pybullet_to_controller_order(self, pybullet_positions):
         """
         Map PyBullet joint positions to controller order.
 
@@ -563,7 +485,7 @@ class IKArmPickupServer(BaseRobotGUI):
         controller_positions = [0.0] * 6
 
         # Set gripper joint to 0.01
-        controller_positions[0] = gripper_opening # 0.005  # xarm_1_joint
+        controller_positions[0] = 0.005  # xarm_1_joint
 
         # Map arm joints (reverse order)
         controller_positions[1] = 0.0  # float(pybullet_positions[4])  # xarm_2_joint
@@ -598,28 +520,20 @@ class IKArmPickupServer(BaseRobotGUI):
 
 
 def main(args=None):
-    """
-    Main entry point using MultiThreadedExecutor for async action server support.
-    """
     rclpy.init(args=args)
 
-    # Create node
-    node = IKArmPickupServer()
-
-    # Create MultiThreadedExecutor for handling callbacks and action server concurrently
-    executor = MultiThreadedExecutor(num_threads=4)
-    executor.add_node(node)
-
     try:
-        # Spin with MultiThreadedExecutor
-        executor.spin()
-    except KeyboardInterrupt:
-        node.get_logger().info("Keyboard interrupt, shutting down")
+        node = IKArmPickupServer()
+
+        try:
+            rclpy.spin(node)
+        except KeyboardInterrupt:
+            pass
+        finally:
+            node.cleanup()
+            node.destroy_node()
+
     finally:
-        # Cleanup
-        node.cleanup()
-        node.destroy_node()
-        executor.shutdown()
         rclpy.shutdown()
 
 
