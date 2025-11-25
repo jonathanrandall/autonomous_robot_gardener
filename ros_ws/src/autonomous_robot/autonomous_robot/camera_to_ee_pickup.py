@@ -107,6 +107,11 @@ class CameraToEEPickup(Node):
             # Use point from dist_camera if available, otherwise use default
             if self.latest_camera_point is not None:
                 point_cam = self.latest_camera_point
+                self.get_logger().info(
+                    f"Using camera point: [{point_cam.point.x:.3f}, "
+                    f"{point_cam.point.y:.3f}, {point_cam.point.z:.3f}] "
+                    f"from frame: {point_cam.header.frame_id}"
+                )
             else:
                 # Default point: 0.2m straight ahead in camera frame
                 point_cam = PointStamped()
@@ -115,6 +120,7 @@ class CameraToEEPickup(Node):
                 point_cam.point.x = -0.0
                 point_cam.point.y = -0.0
                 point_cam.point.z = 0.3
+                self.get_logger().warn("No camera point available, using default")
 
             # Lookup transform at the SAME timestamp as the camera point
             # This ensures temporal consistency
@@ -135,13 +141,14 @@ class CameraToEEPickup(Node):
             self.pub_cam.publish(point_cam)
             self.pub_ee.publish(point_ee)
 
-            self.get_logger().debug(
-                f"Point in camera frame: {point_cam.point} "
-                f"-> in ee frame: {point_ee.point}"
+            self.get_logger().info(
+                f"Transformed point in EE frame: [{point_ee.point.x:.3f}, "
+                f"{point_ee.point.y:.3f}, {point_ee.point.z:.3f}]"
             )
 
         except Exception as e:
-            self.get_logger().warn(f"Transform not available yet: {e}")
+            self.get_logger().warn(f"Transform not available: {e}")
+            self.latest_ee_point = None
 
     def call_pickup_action(self):
         """Call the ik_arm_pickup action."""
