@@ -1,5 +1,5 @@
 from launch import LaunchDescription
-from launch.actions import RegisterEventHandler
+from launch.actions import RegisterEventHandler, ExecuteProcess, TimerAction
 from launch.event_handlers import OnProcessExit
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
@@ -82,11 +82,35 @@ def generate_launch_description():
         )
     )
 
+    # Initialize pan/tilt to desired position (pan=1.2, tilt=-0.15)
+    init_pan_tilt_position = ExecuteProcess(
+        cmd=['ros2', 'topic', 'pub', '--once',
+             '/pi/pan_tilt_controller/commands',
+             'std_msgs/msg/Float64MultiArray',
+             '{data: [1.2, -0.15]}'],
+        output='screen'
+    )
+
+    # Delay the initialization command to run after controller is fully loaded
+    delayed_init_pan_tilt = TimerAction(
+        period=2.0,  # Wait 2 seconds after controller spawner starts
+        actions=[init_pan_tilt_position]
+    )
+
+    # Trigger the delayed init after pan_tilt_controller spawner exits
+    trigger_init_after_controller = RegisterEventHandler(
+        event_handler=OnProcessExit(
+            target_action=pan_tilt_controller_spawner,
+            on_exit=[delayed_init_pan_tilt],
+        )
+    )
+
     nodes = [
         node_robot_state_publisher,
         control_node,
         joint_state_broadcaster_spawner,
         delay_pan_tilt_controller_spawner_after_joint_state_broadcaster,
+        trigger_init_after_controller,
     ]
 
     return LaunchDescription(nodes)

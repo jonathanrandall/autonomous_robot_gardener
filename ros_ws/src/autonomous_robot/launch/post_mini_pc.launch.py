@@ -77,7 +77,7 @@ def generate_launch_description():
     return LaunchDescription([
         angle_arg,
         merge_joint_states_launch,
-        pan_tilt_joy_launch,
+        # pan_tilt_joy_launch,
         image_sync_node,
         camera_to_ee_node,
         ik_arm_pickup_node
