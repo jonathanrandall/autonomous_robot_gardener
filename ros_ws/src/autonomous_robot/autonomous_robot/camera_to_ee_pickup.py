@@ -3,6 +3,7 @@
 import rclpy
 from rclpy.node import Node
 from rclpy.action import ActionClient
+from rclpy.duration import Duration
 from tf2_ros import Buffer, TransformListener
 from geometry_msgs.msg import PointStamped, Point
 from std_msgs.msg import String
@@ -103,13 +104,6 @@ class CameraToEEPickup(Node):
     def transform_point(self):
         """Transform point from camera frame to end effector frame."""
         try:
-            # Lookup transform from camera to ee
-            trans = self.tf_buffer.lookup_transform(
-                self.ee_frame,         # target
-                self.camera_frame,     # source
-                rclpy.time.Time()
-            )
-
             # Use point from dist_camera if available, otherwise use default
             if self.latest_camera_point is not None:
                 point_cam = self.latest_camera_point
@@ -121,6 +115,15 @@ class CameraToEEPickup(Node):
                 point_cam.point.x = -0.0
                 point_cam.point.y = -0.0
                 point_cam.point.z = 0.3
+
+            # Lookup transform at the SAME timestamp as the camera point
+            # This ensures temporal consistency
+            trans = self.tf_buffer.lookup_transform(
+                self.ee_frame,         # target
+                self.camera_frame,     # source
+                rclpy.time.Time.from_msg(point_cam.header.stamp),
+                timeout=Duration(seconds=0.5)
+            )
 
             # Transform it
             point_ee = tf2_geometry_msgs.do_transform_point(point_cam, trans)

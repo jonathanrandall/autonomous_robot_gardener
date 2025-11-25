@@ -9,24 +9,20 @@ This node provides an action server that:
 4. Monitors joint states until arm reaches target
 5. Returns success/failure
 
-Rewritten with async/await and MultiThreadedExecutor for modern ROS2 patterns.
+Uses MultiThreadedExecutor for concurrent callback handling.
 """
 
 import rclpy
-from rclpy.node import Node
 from rclpy.action import ActionServer, GoalResponse, CancelResponse
 from rclpy.executors import MultiThreadedExecutor
-from geometry_msgs.msg import PointStamped
 from sensor_msgs.msg import JointState
 import numpy as np
 import pybullet as p
 import pybullet_data
 import os
-import sys
 import tempfile
 import re
 import time
-import asyncio
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from builtin_interfaces.msg import Duration
 
@@ -109,12 +105,12 @@ class IKArmPickupServer(BaseRobotGUI):
                 self.current_joint_positions[name] = msg.position[i]
         self.get_logger().debug(f'Joint states updated: {list(self.current_joint_positions.keys())}')
 
-    def goal_callback(self, goal_request):
+    def goal_callback(self, _goal_request):
         """Accept or reject incoming goal requests."""
         self.get_logger().info('Received goal request')
         return GoalResponse.ACCEPT
 
-    def cancel_callback(self, goal_handle):
+    def cancel_callback(self, _goal_handle):
         """Handle cancel requests."""
         self.get_logger().info('Received cancel request')
         return CancelResponse.ACCEPT
@@ -154,9 +150,26 @@ class IKArmPickupServer(BaseRobotGUI):
 
         return all_within_tolerance
 
-    async def wait_until_reached(self, goal_handle, timeout_sec: float) -> bool:
+    def sleep_non_blocking(self, duration_sec: float):
         """
-        Async helper to wait until the target is reached or timeout occurs.
+        Non-blocking sleep that allows ROS2 to process callbacks.
+
+        Args:
+            duration_sec: Duration to sleep in seconds
+        """
+        start_time = time.time()
+        sleep_increment = 0.1  # Sleep in 100ms increments
+        while rclpy.ok() and (time.time() - start_time) < duration_sec:
+            try:
+                time.sleep(sleep_increment)
+            except (KeyboardInterrupt, SystemExit):
+                raise
+            except Exception:
+                break
+
+    def wait_until_reached(self, goal_handle, timeout_sec: float) -> bool:
+        """
+        Helper to wait until the target is reached or timeout occurs.
 
         Args:
             goal_handle: Action goal handle for cancellation checks
@@ -194,14 +207,14 @@ class IKArmPickupServer(BaseRobotGUI):
             feedback_msg.status = f'Moving to target ({elapsed:.1f}s)'
             goal_handle.publish_feedback(feedback_msg)
 
-            # Non-blocking sleep using asyncio
-            await asyncio.sleep(sleep_duration)
+            # Blocking sleep - OK since we're in MultiThreadedExecutor
+            time.sleep(sleep_duration)
 
         # If we exit the loop, rclpy is shutting down
         self.get_logger().info("Node shutting down during wait")
         return False
 
-    async def execute_callback(self, goal_handle):
+    def execute_callback(self, goal_handle):
         """
         Execute the pickup action.
 
@@ -265,14 +278,14 @@ class IKArmPickupServer(BaseRobotGUI):
 
             self.get_logger().info("Published joint trajectory")
 
-            # Wait for arm to reach target using async helper
+            # Wait for arm to reach target
             feedback_msg.progress = 0.5
             feedback_msg.status = 'Moving to target'
             goal_handle.publish_feedback(feedback_msg)
 
-            # Use async helper function to wait
+            # Wait for target to be reached
             timeout = 10.0  # seconds
-            reached = await self.wait_until_reached(goal_handle, timeout)
+            reached = self.wait_until_reached(goal_handle, timeout)
 
             # Check if cancelled - if so, abort without gripper sequence
             if goal_handle.is_cancel_requested:
@@ -292,9 +305,8 @@ class IKArmPickupServer(BaseRobotGUI):
                 pybullet_joint_positions, gripper_opening=0.028
             )
             self.send_all_joints(controller_joint_positions_closed, time_from_start_sec=1)
-            self.current_joint_positions = controller_joint_positions_closed
-            # Wait 2 seconds
-            await asyncio.sleep(2.0)
+            # Wait 2 seconds (non-blocking)
+            self.sleep_non_blocking(2.0)
 
             # Send all joints to zero except gripper (0.028 - fully closed)
             self.get_logger().info("Moving all joints to zero (gripper closed)...")
@@ -306,9 +318,8 @@ class IKArmPickupServer(BaseRobotGUI):
                 [0.0]*6, gripper_opening=0.028
             )
             self.send_all_joints(zero_positions_gripper_closed, time_from_start_sec=1)
-            self.current_joint_positions = zero_positions_gripper_closed
-            # Wait 2 seconds
-            await asyncio.sleep(2.0)
+            # Wait 2 seconds (non-blocking)
+            self.sleep_non_blocking(2.0)
 
             # Send all joints to zero and gripper to 0.005 (open)
             self.get_logger().info("Opening gripper and returning to zero...")
@@ -320,7 +331,6 @@ class IKArmPickupServer(BaseRobotGUI):
                 [0.0]*6, gripper_opening=0.005
             )
             self.send_all_joints(zero_positions, time_from_start_sec=1)
-            self.current_joint_positions = zero_positions
 
             if reached:
                 # Success - target was reached
@@ -514,7 +524,7 @@ class IKArmPickupServer(BaseRobotGUI):
         control_joint_positions = [joint_positions[idx] for idx in self.pybullet_control_indices]
 
         # Check if solution is within joint limits
-        for i, idx in enumerate(self.pybullet_control_indices):
+        for i in range(len(self.pybullet_control_indices)):
             joint_name = self.pybullet_joint_names[i]
             lower = self.joint_info[joint_name]['lower_limit']
             upper = self.joint_info[joint_name]['upper_limit']
@@ -599,7 +609,7 @@ class IKArmPickupServer(BaseRobotGUI):
 
 def main(args=None):
     """
-    Main entry point using MultiThreadedExecutor for async action server support.
+    Main entry point using MultiThreadedExecutor for action server support.
     """
     rclpy.init(args=args)
 
