@@ -89,6 +89,56 @@ camera_to_ee_pickup                    ik_arm_pickup
 - When action completes, returns to `IDLE` state
 - Publishes `pickup_state` topic so other nodes know if it's busy
 
+### Running the example
+
+#### On the Mini PC
+
+1. **Launch the main robot controller** - starts the mobile base, xArm controller, and robot state publisher:
+```bash
+ros2 launch autonomous_robot mini_pc.launch.py
+```
+
+#### On the Raspberry Pi
+
+2. **Launch the pan-tilt controller** - starts the servo control for the camera mount:
+```bash
+ros2 launch autonomous_robot pi.launch.py
+```
+
+3. **Launch the camera publisher** - starts publishing RGB and depth camera streams:
+```bash
+ros2 launch camera_publisher camera_publisher.launch.py
+```
+
+#### Back on the Mini PC
+
+4. **Launch the joint states merger** - combines joint states from the Mini PC and Pi into a single `/joint_states` topic:
+```bash
+ros2 launch autonomous_robot merge_joint_states.launch.py
+```
+
+5. **Launch the image sync processor** - synchronizes RGB and depth images for processing:
+```bash
+ros2 launch image_sync_processor image_sync_processor.launch.py
+```
+
+6. **Run the camera to end-effector pickup node** - transforms camera coordinates to arm base frame and sends action requests:
+```bash
+ros2 run autonomous_robot camera_to_ee_pickup.py
+```
+
+7. **Run the IK arm pickup action server** - computes inverse kinematics and executes the pickup sequence:
+```bash
+ros2 run xarm_kinematics ik_arm_pickup.py
+```
+
+8. **Launch the leaf tracker** - detects leaves and publishes tracking status:
+```bash
+ros2 launch pan_tilt_track leaf_tracker_status.launch.py
+```
+
+Once all nodes are running, the system will automatically detect leaves, track them with the pan-tilt camera, and execute pickup sequences when targets are acquired.
+
 ---
 
 ## Running the Simulation
