@@ -36,12 +36,34 @@ def generate_launch_description():
     )
     robot_description = {"robot_description": robot_description_content}
 
+#     Pi's URDF (pan_tilt_standalone_pi.xacro:55-56):
+#   <xacro:pan_tilt_mechanism parent="base_link">
+#     <origin xyz="0 0 0.05" rpy="0 0 0"/>
+#   Pan_tilt attached to standalone base_link at [0, 0, 0.05]
+
+#   Main robot's URDF (robot_pan_tilt.xacro:9-11):
+#   <xacro:pan_tilt_mechanism parent="chassis">
+#     <origin xyz="${chassis_length/2-0.08+0.028} -${chassis_width/2-0.088+0.04} ${chassis_height}" 
+#   rpy="0 0.0 0"/>
+#   Pan_tilt attached to chassis at the correct offset!
+
+#   Both are publishing transforms for the same link names (pan_tilt_base_link, rgb_camera_optical_link,
+#   etc.), creating a TF conflict. Sometimes the Pi's transforms "win", placing the camera at the wrong
+#   location.
+
+#   ---
+#   The Solution
+
+#   The Pi's robot_state_publisher must be disabled from publishing TF. We need to keep the URDF
+#   available for ros2_control but NOT publish transforms. this is why we add {'publish_frequency': 0.0}
+#   to the robot_state_publisher parameters.
+
     node_robot_state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
         namespace="pi",
         output='screen',
-        parameters=[robot_description]
+        parameters=[robot_description, {'publish_frequency': 0.0}]  # Disable TF publishing
     )
 
 
