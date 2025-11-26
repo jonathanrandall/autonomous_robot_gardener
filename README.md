@@ -23,6 +23,74 @@ colcon build --symlink-install
 
 ---
 
+## The pick-up leaf example
+
+### Leaf Tracking and xArm Pickup Workflow
+
+#### 1. Leaf Detection & Tracking (`leaf_tracker_status`)
+
+- Detects leaves in the camera image
+- Publishes `/track_status` topic with status messages like `"target_acquired"` when a leaf is centered and ready
+
+#### 2. Coordinate Transformation (`camera_to_ee_pickup.py`)
+
+- Subscribes to:
+  - `/dist_camera` - receives leaf position in camera coordinates (PointStamped)
+  - `/track_status` - receives tracking status from leaf tracker
+
+- When it receives `track_status == "target_acquired"`:
+  - Changes its state from `IDLE` to `BUSY`
+  - Transforms the leaf position from `rgb_camera_optical_link` frame to `xarm_base_link` frame using TF
+  - Sends an ACTION REQUEST to `ik_arm_pickup`
+
+#### 3. The Action Communication (This is the key part!)
+
+- **Action Client** (`camera_to_ee_pickup.py:58`): Creates an action client
+- **Action Server** (`ik_arm_pickup.py:88-95`): Provides the action server
+- **Action Definition** (`ArmPickup.action`):
+  - **Goal**: Target position (x, y, z) in xarm_base_link frame
+  - **Feedback**: Progress (0-1.0) and status messages like "Computing IK", "Moving to target", etc.
+  - **Result**: Success/failure with a message
+
+The action communication works like this:
+```
+camera_to_ee_pickup                    ik_arm_pickup
+(Action Client)                        (Action Server)
+      |                                      |
+      |------ Send Goal (target_position) -->|
+      |                                      | Compute IK
+      |<----- Feedback (progress: 0.1) -----|
+      |                                      | Send trajectory
+      |<----- Feedback (progress: 0.5) -----|
+      |                                      | Move arm
+      |                                      | Close gripper
+      |<----- Feedback (progress: 0.85) ----|
+      |                                      | Return to zero
+      |<----- Result (success: true) --------|
+      |                                      |
+```
+
+#### 4. Arm Pickup Execution (`ik_arm_pickup.py`)
+
+- Receives the action goal
+- Computes inverse kinematics using PyBullet
+- Publishes joint trajectory to `/arm/hiwonder_xarm_controller/joint_trajectory`
+- Monitors joint states to verify the arm reached the target
+- Executes gripper sequence:
+  1. Move to target position (gripper open)
+  2. Close gripper
+  3. Return to zero position (gripper closed)
+  4. Open gripper and finish
+- Sends feedback throughout the process
+- Returns result (success/failure) when complete
+
+#### 5. State Management (`camera_to_ee_pickup.py`)
+
+- When action completes, returns to `IDLE` state
+- Publishes `pickup_state` topic so other nodes know if it's busy
+
+---
+
 ## Running the Simulation
 
 To launch the simulation:
