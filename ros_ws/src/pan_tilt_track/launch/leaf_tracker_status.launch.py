@@ -10,12 +10,12 @@ def generate_launch_description():
     return LaunchDescription([
         DeclareLaunchArgument(
             'scale_factor_x',
-            default_value='0.4',
+            default_value='0.25',
             description='Scale factor for pan (X-axis) control'
         ),
         DeclareLaunchArgument(
             'scale_factor_y',
-            default_value='0.4',
+            default_value='0.25',
             description='Scale factor for tilt (Y-axis) control'
         ),
         DeclareLaunchArgument(
