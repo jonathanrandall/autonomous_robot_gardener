@@ -304,6 +304,7 @@ class IKArmPickupServer(BaseRobotGUI):
             controller_joint_positions_closed = self.map_pybullet_to_controller_order(
                 pybullet_joint_positions, gripper_opening=0.028
             )
+            self.target_joint_positions = controller_joint_positions_closed  # Update target to include closed gripper
             self.send_all_joints(controller_joint_positions_closed, time_from_start_sec=1)
             # Wait 2 seconds (non-blocking)
             self.sleep_non_blocking(2.0)
@@ -317,6 +318,7 @@ class IKArmPickupServer(BaseRobotGUI):
             zero_positions_gripper_closed = self.map_pybullet_to_controller_order(
                 [0.0]*6, gripper_opening=0.028
             )
+            self.target_joint_positions = zero_positions_gripper_closed  # Update target
             self.send_all_joints(zero_positions_gripper_closed, time_from_start_sec=1)
             # Wait 2 seconds (non-blocking)
             self.sleep_non_blocking(2.0)
@@ -330,6 +332,7 @@ class IKArmPickupServer(BaseRobotGUI):
             zero_positions = self.map_pybullet_to_controller_order(
                 [0.0]*6, gripper_opening=0.005
             )
+            self.target_joint_positions = zero_positions  # Update target
             self.send_all_joints(zero_positions, time_from_start_sec=1)
 
             if reached:
@@ -587,12 +590,14 @@ class IKArmPickupServer(BaseRobotGUI):
     def send_all_joints(self, joint_angles, time_from_start_sec=1):
         """Send all joint positions to the controller"""
         trajectory = JointTrajectory()
+        trajectory.header.stamp = self.get_clock().now().to_msg()
         trajectory.joint_names = self.joint_names
         trajectory.points = [JointTrajectoryPoint(
             positions=joint_angles,
             time_from_start=Duration(sec=time_from_start_sec)
         )]
         self.trajectory_pub.publish(trajectory)
+        self.get_logger().info(f"Published trajectory with {len(joint_angles)} joints, gripper={joint_angles[0]:.4f}")
         return trajectory
 
     def cleanup(self):
