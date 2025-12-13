@@ -42,7 +42,7 @@ class ImageSyncProcessor(Node):
         # self.yolo_model = YOLO('yolo11s.pt')
         # self.yolo_model = YOLO('yolo11n.pt')
         # self.yolo_model = YOLO('hand_raise.pt')
-        self.yolo_model = YOLO('yollo11n_leaf_v4.pt')
+        self.yolo_model = YOLO('yollo11n_leaf_v6.pt')
 
         # Interpolation parameters: [slope, intercept] for pixel shift calculation
         # interp_params[0] for distance < 30, interp_params[1] for distance >= 30
